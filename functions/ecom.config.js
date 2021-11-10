@@ -7,8 +7,8 @@
 
 const app = {
   app_id: 113859,
-  title: 'My Awesome E-Com Plus App',
-  slug: 'my-awesome-app',
+  title: 'Importador de feed XML',
+  slug: 'feed-importer',
   type: 'external',
   state: 'active',
   authentication: true,
