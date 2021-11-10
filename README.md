@@ -1,10 +1,14 @@
+# App Feed Importer
+
+[![Deploy](https://github.com/ecomplus/app-feed-importer/workflows/Deploy/badge.svg)](https://github.com/ecomplus/app-feed-importer/actions?workflow=Deploy)  [![License MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+E-Com Plus app to import GMC XML feeds
+
+[CHANGELOG](https://github.com/ecomplus/app-feed-importer/blob/master/CHANGELOG.md)
+
 # E-Com Plus Application Starter
 
-[![Deploy](https://github.com/ecomplus/application-starter/workflows/Deploy/badge.svg)](https://github.com/ecomplus/application-starter/actions?workflow=Deploy)  [![License MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
 :dog: Boilerplate for E-Com Plus apps with [Firebase](https://firebase.google.com/) Cloud Functions and GitHub Actions.
-
-[CHANGELOG](https://github.com/ecomplus/application-starter/blob/master/CHANGELOG.md)
 
 ## Getting started
 
