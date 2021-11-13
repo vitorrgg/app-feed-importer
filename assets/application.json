@@ -26,7 +26,27 @@
     "products/price": [],
     "products/variations/price": []
   },
-  "admin_settings": {},
+  "admin_settings": {
+    "importation": {
+      "schema": {
+        "title": "Importação manual",
+        "description": "Importa arquivo xml do google merchant center",
+        "type": "object",
+        "properties": {
+          "products": {
+            "title": "Produtos a importar",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "title": "XML do GMC",
+              "description": "Arquivo XML do google merchant center que vai ser importado para E-com Plus"
+            }
+          }
+        }
+      },
+      "hide": false
+    }
+  },
   "auth_callback_uri": "https://us-central1-ecom-feed-importer.cloudfunctions.net/app/ecom/auth-callback",
   "version": "1.0.0"
 }
