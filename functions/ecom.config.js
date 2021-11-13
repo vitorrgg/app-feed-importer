@@ -138,9 +138,30 @@ const app = {
   },
 
   admin_settings: {
-    /**
-     * JSON schema based fields to be configured by merchant and saved to app `data` / `hidden_data`, such as:
 
+    //* JSON schema based fields to be configured by merchant and saved to app `data` / `hidden_data`, such as:*/
+
+    importation: {
+      schema: {
+        title: 'Importação manual',
+        description: 'Importa arquivo xml do google merchant center',
+        type: 'object',
+        properties: {
+          products: {
+            title: 'Produtos a importar',
+            type: 'array',
+            items: {
+              type: 'string',
+              title: 'XML do GMC',
+              description: 'Arquivo XML do google merchant center que vai ser importado para E-com Plus'
+            }
+          }
+        }
+      },
+      hide: false
+    },
+
+    /**
      webhook_uri: {
        schema: {
          type: 'string',
