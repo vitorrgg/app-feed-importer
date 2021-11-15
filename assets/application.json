@@ -35,7 +35,7 @@
         "title": "URL do XML do google merchant center",
         "description": "URL do arquivo XML do google merchant center que voce deseja importar para á E-com"
       },
-      "hide": true
+      "hide": false
     }
   },
   "auth_callback_uri": "https://us-central1-ecom-feed-importer.cloudfunctions.net/app/ecom/auth-callback",
