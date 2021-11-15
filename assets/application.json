@@ -7,8 +7,12 @@
   "authentication": true,
   "modules": {},
   "auth_scope": {
-    "stores/me": ["GET"],
-    "procedures": ["POST"],
+    "stores/me": [
+      "GET"
+    ],
+    "procedures": [
+      "POST"
+    ],
     "products": [],
     "brands": [],
     "categories": [],
@@ -37,4 +41,3 @@
   "auth_callback_uri": "https://us-central1-ecom-feed-importer.cloudfunctions.net/app/ecom/auth-callback",
   "version": "1.0.0"
 }
-
