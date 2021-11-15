@@ -149,7 +149,7 @@ const app = {
         title: 'URL do XML do google merchant center',
         description: 'URL do arquivo XML do google merchant center que voce deseja importar para á E-com'
       },
-      hide: true
+      hide: false
     },
 
     /**
