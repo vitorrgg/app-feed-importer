@@ -37,3 +37,4 @@
   "auth_callback_uri": "https://us-central1-ecom-feed-importer.cloudfunctions.net/app/ecom/auth-callback",
   "version": "1.0.0"
 }
+
