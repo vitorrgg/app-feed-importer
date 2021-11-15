@@ -1,3 +1,7 @@
+const functions = require('firebase-functions')
+const updateAppData = require('./../../lib/store-api/update-app-data')
+
+
 // read configured E-Com Plus app data
 const getAppData = require('./../../lib/store-api/get-app-data')
 
@@ -6,7 +10,16 @@ const ECHO_SUCCESS = 'SUCCESS'
 const ECHO_SKIP = 'SKIP'
 const ECHO_API_ERROR = 'STORE_API_ERR'
 
-exports.post = ({ appSdk }, req, res) => {
+
+const addNotification = (admin, trigger) => {
+  functions.logger.info('[addNotification]', trigger)
+  return admin.firestore()
+    .collection('ecom_notifications')
+    .add(trigger)
+}
+
+
+exports.post = ({ admin, appSdk }, req, res) => {
   // receiving notification from Store API
   const { storeId } = req
 
@@ -30,9 +43,24 @@ exports.post = ({ appSdk }, req, res) => {
         throw err
       }
 
-      /* DO YOUR CUSTOM STUFF HERE */
+      const { body, fields, resource, action } = trigger
 
-      // all done
+      functions.logger.info('[WEBHOOK TRIGGER]', trigger)
+
+      switch (resource) {
+        case 'applications':
+          if (Array.isArray(fields) && fields.includes('data')) {
+            if (body.feed_url) {
+              addNotification(admin, trigger)
+            }
+
+            updateAppData({ appSdk, storeId, auth }, { feed_url: '' })
+          }
+          break
+        default:
+          break
+      }
+
       res.send(ECHO_SUCCESS)
     })
 
