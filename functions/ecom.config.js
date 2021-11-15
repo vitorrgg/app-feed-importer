@@ -238,12 +238,12 @@ procedures.push({
     // },
     {
       resource: 'applications',
-      field: 'data',
+      field: 'data'
     },
     {
       resource: 'applications',
-      field: 'hidden_data',
-    },
+      field: 'hidden_data'
+    }
     // Feel free to create custom combinations with any Store API resource, subresource, action and field.
   ],
 
