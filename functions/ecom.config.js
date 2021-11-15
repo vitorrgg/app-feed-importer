@@ -191,9 +191,6 @@ const app = {
 
 const procedures = []
 
-/**
- * Uncomment and edit code above to configure `triggers` and receive respective `webhooks`:
-
 const { baseUri } = require('./__env')
 
 procedures.push({
@@ -201,45 +198,52 @@ procedures.push({
 
   triggers: [
     // Receive notifications when new order is created:
-    {
-      resource: 'orders',
-      action: 'create',
-    },
+    // {
+    //   resource: 'orders',
+    //   action: 'create',
+    // },
 
     // Receive notifications when order financial/fulfillment status are set or changed:
     // Obs.: you probably SHOULD NOT enable the orders triggers below and the one above (create) together.
-    {
-      resource: 'orders',
-      field: 'financial_status',
-    },
-    {
-      resource: 'orders',
-      field: 'fulfillment_status',
-    },
+    // {
+    //   resource: 'orders',
+    //   field: 'financial_status',
+    // },
+    // {
+    //   resource: 'orders',
+    //   field: 'fulfillment_status',
+    // },
 
     // Receive notifications when products/variations stock quantity changes:
-    {
-      resource: 'products',
-      field: 'quantity',
-    },
-    {
-      resource: 'products',
-      subresource: 'variations',
-      field: 'quantity'
-    },
+    // {
+    //   resource: 'products',
+    //   field: 'quantity',
+    // },
+    // {
+    //   resource: 'products',
+    //   subresource: 'variations',
+    //   field: 'quantity'
+    // },
 
     // Receive notifications when cart is edited:
-    {
-      resource: 'carts',
-      action: 'change',
-    },
+    // {
+    //   resource: 'carts',
+    //   action: 'change',
+    // },
 
     // Receive notifications when customer is deleted:
+    // {
+    //   resource: 'customers',
+    //   action: 'delete',
+    // },
     {
-      resource: 'customers',
-      action: 'delete',
+      resource: 'applications',
+      feild: 'data',
     },
-
+    {
+      resource: 'applications',
+      feild: 'hidden_data',
+    },
     // Feel free to create custom combinations with any Store API resource, subresource, action and field.
   ],
 
@@ -255,8 +259,6 @@ procedures.push({
   ]
 })
 
- * You may also edit `routes/ecom/webhook.js` to treat notifications properly.
- */
 
 exports.app = app
 
