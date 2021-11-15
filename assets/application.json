@@ -7,12 +7,8 @@
   "authentication": true,
   "modules": {},
   "auth_scope": {
-    "stores/me": [
-      "GET"
-    ],
-    "procedures": [
-      "POST"
-    ],
+    "stores/me": ["GET"],
+    "procedures": ["POST"],
     "products": [],
     "brands": [],
     "categories": [],
@@ -27,25 +23,15 @@
     "products/variations/price": []
   },
   "admin_settings": {
-    "importation": {
+    "feed_url": {
       "schema": {
-        "title": "Importação manual",
-        "description": "Importa arquivo xml do google merchant center",
-        "type": "object",
-        "properties": {
-          "feed_url": {
-            "schema": {
-              "type": "string",
-              "maxLength": 255,
-              "format": "uri",
-              "title": "XML do google merchant center",
-              "description": "Arquivo XML do google merchant center que voce deseja importar para á E-com"
-            },
-            "hide": true
-          }
-        }
+        "type": "string",
+        "maxLength": 255,
+        "format": "uri",
+        "title": "XML do google merchant center",
+        "description": "Arquivo XML do google merchant center que voce deseja importar para á E-com"
       },
-      "hide": false
+      "hide": true
     }
   },
   "auth_callback_uri": "https://us-central1-ecom-feed-importer.cloudfunctions.net/app/ecom/auth-callback",
