@@ -141,25 +141,15 @@ const app = {
 
     //* JSON schema based fields to be configured by merchant and saved to app `data` / `hidden_data`, such as:*/
 
-    importation: {
+    feed_url: {
       schema: {
-        title: 'Importação manual',
-        description: 'Importa arquivo xml do google merchant center',
-        type: 'object',
-        properties: {
-          feed_url: {
-            schema: {
-              type: 'string',
-              maxLength: 255,
-              format: 'uri',
-              title: 'XML do google merchant center',
-              description: 'Arquivo XML do google merchant center que voce deseja importar para á E-com'
-            },
-            hide: true
-          }
-        }
+        type: 'string',
+        maxLength: 255,
+        format: 'uri',
+        title: 'XML do google merchant center',
+        description: 'Arquivo XML do google merchant center que voce deseja importar para á E-com'
       },
-      hide: false
+      hide: true
     },
 
     /**
