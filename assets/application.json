@@ -36,6 +36,14 @@
         "description": "URL do arquivo XML do google merchant center que voce deseja importar para á E-com"
       },
       "hide": false
+    },
+    "balance_amount": {
+      "schema": {
+        "type": "interger",
+        "default": 10,
+        "title": "Valor e saldo do produto",
+        "description": "Informar o valor do saldo caso o produto possua disponibilidade"
+      }
     }
   },
   "auth_callback_uri": "https://us-central1-ecom-feed-importer.cloudfunctions.net/app/ecom/auth-callback",
