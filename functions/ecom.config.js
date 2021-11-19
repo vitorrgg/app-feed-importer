@@ -151,12 +151,11 @@ const app = {
       },
       hide: false
     },
-    balance_amount:{
+    default_quantity:{
       schema: {
-        type:'interger',
-        default: 10,
-        title: 'Valor e saldo do produto',
-        description: 'Informar o valor do saldo caso o produto possua disponibilidade'
+        type:'integer',
+        title: 'Saldo default para os produtos com estoque',
+        description: 'Informar o saldo default quando tiver disponibilidade'
       }
     },
     /**
