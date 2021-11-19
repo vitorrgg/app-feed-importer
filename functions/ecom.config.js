@@ -151,7 +151,14 @@ const app = {
       },
       hide: false
     },
-
+    balance_amount:{
+      schema: {
+        type:'interger',
+        default: 10,
+        title: 'Valor e saldo do produto',
+        description: 'Informar o valor do saldo caso o produto possua disponibilidade'
+      }
+    },
     /**
      webhook_uri: {
        schema: {
