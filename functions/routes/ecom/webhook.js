@@ -5,18 +5,13 @@ const updateAppData = require('./../../lib/store-api/update-app-data')
 // read configured E-Com Plus app data
 const getAppData = require('./../../lib/store-api/get-app-data')
 
+const addNotification = require('../../utils/addNotification')
+
+
 const SKIP_TRIGGER_NAME = 'SkipTrigger'
 const ECHO_SUCCESS = 'SUCCESS'
 const ECHO_SKIP = 'SKIP'
 const ECHO_API_ERROR = 'STORE_API_ERR'
-
-
-const addNotification = (admin, trigger) => {
-  functions.logger.info('[addNotification]', trigger)
-  return admin.firestore()
-    .collection('ecom_notifications')
-    .add(trigger)
-}
 
 
 exports.post = ({ admin, appSdk }, req, res) => {
