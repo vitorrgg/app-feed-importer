@@ -1,18 +1,15 @@
 
 const functions = require('firebase-functions')
-const { auth } = require('firebase-admin')
-const { setup } = require('@ecomplus/application-sdk')
 const admin = require('firebase-admin')
-const getAppData = require('./store-api/get-app-data')
-const { logger } = require('firebase-functions')
 const axios = require('axios').default
 const xmlParser = require('fast-xml-parser')
 
 const addNotification = require('../utils/addNotification')
 
-
 const getFeedItems = (feedData) => {
-  if (feedData && feedData.hasOwnProperty('rss')) {
+  const hasRssProperty = Object.prototype.hasOwnProperty.call(feedData, 'rss')
+
+  if (feedData && hasRssProperty) {
     return feedData && feedData.rss && feedData.rss.channel.item
   }
   return feedData && feedData.feed && feedData.feed.entry
@@ -24,10 +21,9 @@ const getFeed = async (feedUrl) => {
 
 const handleFeedQueue = async (storeId, feedUrl) => {
   const { data: feedData } = await getFeed(feedUrl)
-  parsedFeed = xmlParser.parse(feedData)
+  const parsedFeed = xmlParser.parse(feedData)
   const products = getFeedItems(parsedFeed)
   for (const product of products) {
-
     const trigger = {
       resource: 'feed_create_product',
       body: product,
@@ -38,29 +34,33 @@ const handleFeedQueue = async (storeId, feedUrl) => {
   }
 }
 
-
 exports.onEcomNotification = functions.firestore
   .document('ecom_notifications/{documentId}')
   .onCreate(async (snap) => {
     try {
       const notification = snap.data()
-      const { resource, store_id, body } = notification
+      const { resource, store_id: storeId, body } = notification
 
       switch (resource) {
         case 'applications':
           if (body && body.feed_url) {
-            await handleFeedQueue(store_id, body.feed_url)
+            await handleFeedQueue(storeId, body.feed_url)
           }
-          break;
+          break
 
+        case 'feed_create_product':
+          // fazer o parse do produto
+          // verificar se o produto já existe
+          // caso exista, atualiza | caso não exista cria
+          // Provavelmente vamos precisar ter um campo que pergunta se o usuário vai querer sobrescrer o produto
+          break
         default:
-          break;
+          break
       }
     } catch (error) {
 
     }
   })
-
 
 module.exports = {
   handleFeedQueue
