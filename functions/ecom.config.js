@@ -158,6 +158,15 @@ const app = {
         description: 'Informar o saldo default quando tiver disponibilidade'
       }
     },
+    update_product: {
+      schema: {
+        type:'boolean',
+        default: false,
+        title: 'Sobrescrever produto',
+        description: 'Atualizar cadastro (não apenas estoque de produtos importados já existentes na plataforma'
+      },
+      hide: true
+    }
     /**
      webhook_uri: {
        schema: {
