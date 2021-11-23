@@ -1,5 +1,3 @@
-
-const { AlexaForBusiness } = require('aws-sdk')
 const { logger } = require('firebase-functions')
 const slugify = require('slugify')
 const axios = require('axios')
@@ -68,7 +66,7 @@ const tryImageUpload = (storeId, auth, originImgUrl, product) => new Promise(res
 
     .catch(err => {
       console.error(err)
-      resolve ({
+      resolve({
         _id: ecomUnits.randomObjectId(),
         normal: {
           url: oringinImgUrl,
@@ -77,7 +75,7 @@ const tryImageUpload = (storeId, auth, originImgUrl, product) => new Promise(res
       })
     })
 }).then(picture => {
-  if (product && product.pictures){
+  if (product && product.pictures) {
     product.pictures.push(picture)
   }
   return picture
