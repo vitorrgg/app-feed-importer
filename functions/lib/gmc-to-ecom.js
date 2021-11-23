@@ -27,7 +27,7 @@ const parseProduct = async (appData, feedProduct) => {
       subtitle: getFeedValueByKey('subtitle', feedProduct),
       meta_title: getFeedValueByKey('title', feedProduct),
       meta_description: getFeedValueByKey('description', feedProduct),
-      keywords: (getFeedValueByKey('google_product_category', feedProduct) || '').split('&gt;').map(x => x.trim()),
+      keywords: (getFeedValueByKey('google_product_category', feedProduct) || '').split('&gt;').map(x => x.trim().substring(0, 49)),
       condition: getFeedValueByKey('condition', feedProduct),
       base_price: Number(getFeedValueByKey('price', feedProduct).replace(/[a-z A-Z]/g, '').trim()),
       price: Number(getFeedValueByKey('sale_price', feedProduct).replace(/[a-z A-Z]/g, '').trim()),
@@ -44,7 +44,7 @@ const parseProduct = async (appData, feedProduct) => {
     }
     const gtin = getFeedValueByKey('gtin', feedProduct)
     if (gtin) {
-      product.gtin = [gtin]
+      product.gtin = [gtin.toString()]
     }
 
     let quantity = 0

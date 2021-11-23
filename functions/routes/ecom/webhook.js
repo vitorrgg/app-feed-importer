@@ -1,5 +1,6 @@
 const functions = require('firebase-functions')
 const updateAppData = require('./../../lib/store-api/update-app-data')
+const { auth } = require('firebase-admin')
 
 
 // read configured E-Com Plus app data
@@ -38,7 +39,7 @@ exports.post = ({ admin, appSdk }, req, res) => {
         throw err
       }
 
-      const { body, fields, resource, action } = trigger
+      const { body, fields, resource } = trigger
 
       functions.logger.info('[WEBHOOK TRIGGER]', trigger)
 
