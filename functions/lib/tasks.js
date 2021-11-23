@@ -25,17 +25,22 @@ const getFeed = async (feedUrl) => {
 }
 
 const handleFeedQueue = async (storeId, feedUrl) => {
-  const { data: feedData } = await getFeed(feedUrl)
-  const parsedFeed = xmlParser.parse(feedData)
-  const products = getFeedItems(parsedFeed)
-  for (const product of products) {
-    const trigger = {
-      resource: 'feed_create_product',
-      body: product,
-      store_id: storeId
+  try {
+    logger.info('[handleFeedQueue]', JSON.stringify({ storeId, feedUrl }))
+    const { data: feedData } = await getFeed(feedUrl)
+    const parsedFeed = xmlParser.parse(feedData)
+    const products = getFeedItems(parsedFeed)
+    for (const product of products) {
+      const trigger = {
+        resource: 'feed_create_product',
+        body: product,
+        store_id: storeId
+      }
+      addNotification(admin, trigger)
     }
-
-    addNotification(admin, trigger)
+  } catch (error) {
+    logger.error('[handleFeedQueue: error to process xmlparse]', error)
+    throw error
   }
 }
 
