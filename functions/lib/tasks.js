@@ -43,6 +43,7 @@ exports.onEcomNotification = functions.firestore
   .document('ecom_notifications/{documentId}')
   .onCreate(async (snap) => {
     let hasError = false
+    logger.info('[ecomNotification:start task]', JSON.stringify(snap.data()))
 
     try {
       const appSdk = await setup(null, true, admin.firestore())
