@@ -65,7 +65,6 @@ const saveEcomProduct = async (appSdk, appData, storeId, feedProduct) => {
     const parsedProduct = await parseProduct(appData, feedProduct)
     const { result } = await findEcomProductBySKU(appSdk, storeId, parsedProduct.sku)
     const productId = result.length > 0 ? result[0]._id : null
-
     const resource = productId ? `/products/${productId}.json` : '/products.json'
     const method = productId ? 'PATCH' : 'POST'
     let ecomResponse = {}
