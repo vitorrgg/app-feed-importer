@@ -4,6 +4,7 @@ const { functionName, operatorToken } = require('./__env')
 
 const path = require('path')
 const recursiveReadDir = require('./lib/recursive-read-dir')
+const { onEcomNotification } = require('./lib/tasks')
 
 // Firebase SDKs to setup cloud functions and access Firestore database
 const admin = require('firebase-admin')
@@ -133,7 +134,11 @@ recursiveReadDir(routesDir).filter(filepath => filepath.endsWith('.js')).forEach
 server.use(router)
 
 exports[functionName] = functions.https.onRequest(server)
+exports.onEcomNotification = onEcomNotification
+
+
 console.log(`-- Starting '${app.title}' E-Com Plus app with Function '${functionName}'`)
+
 
 // schedule update tokens job
 const cron = '25 */3 * * *'
