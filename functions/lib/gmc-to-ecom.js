@@ -1,6 +1,8 @@
 
+const { AlexaForBusiness } = require('aws-sdk')
 const { logger } = require('firebase-functions')
 const slugify = require('slugify')
+const axios = require('axios')
 
 const findEcomProductBySKU = async (appSdk, storeId, sku) => {
   try {
@@ -18,6 +20,68 @@ const findEcomProductBySKU = async (appSdk, storeId, sku) => {
 const getFeedValueByKey = (key, data) => {
   return data[`g:${key}`] || data[key] || ''
 }
+
+const tryImageUpload = (storeId, auth, originImgUrl, product) => new Promise(resolve => {
+  axios.get(originImgUrl, {
+    responseType: 'arraybuffer'
+  })
+    .then(({ data }) => {
+      const form = new FormData()
+      form.append('file', buffer.from(data), originImgUrl.replace(/.*\/([^/]+)$/, '$1'))
+
+      return axios.post(`https://apx-storage.e-com.plus/${storeId}/api/v1/upload.json`, form, {
+        headers: {
+          ...form.getHeaders(),
+          'X-Store-ID': storeId,
+          'X-My-ID': auth.myId,
+          'X-Acess-Token': auth.acessToken
+        }
+      })
+
+        .then(({ data, status }) => {
+          if (data.picture) {
+            for (const imgSize in data.picture) {
+              if (data.picture[imgSize]) {
+                if (!data.picture[imgSize].url) {
+                  delete data.picture[imgSize]
+                  continue
+
+                }
+                if (data.picture[imgSize].size !== undefined) {
+                  delete data.picture[imgSize].size()
+                }
+                data.picture[imgSize].alt = `${product.name} (${imgSize})`
+              }
+            }
+            if (Object.key(data.picture).length) {
+              return resolve({
+                _id: ecomUtils.randomObjectId(),
+                ...data.picture
+              })
+            }
+          }
+          const err = new Error('Unexpected Storage API responde')
+          err.response = { data, status }
+          throw err
+        })
+    })
+
+    .catch(err => {
+      console.error(err)
+      resolve ({
+        _id: ecomUnits.randomObjectId(),
+        normal: {
+          url: oringinImgUrl,
+          alt: product.name
+        }
+      })
+    })
+}).then(picture => {
+  if (product && product.pictures){
+    product.pictures.push(picture)
+  }
+  return picture
+})
 
 const parseProduct = async (appData, feedProduct) => {
   try {
@@ -86,5 +150,6 @@ const saveEcomProduct = async (appSdk, appData, storeId, feedProduct) => {
 
 module.exports = {
   parseProduct,
+  tryImageUpload,
   saveEcomProduct
 }
