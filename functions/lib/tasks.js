@@ -6,7 +6,7 @@ const axios = require('axios').default
 const xmlParser = require('fast-xml-parser')
 const { setup } = require('@ecomplus/application-sdk')
 const getAppData = require('../../store-api/get-app-data')
-const { logger } = require('firebase-functions');
+const { logger } = require('firebase-functions')
 
 const addNotification = require('../utils/addNotification')
 const { saveEcomProduct } = require('./gmc-to-ecom')

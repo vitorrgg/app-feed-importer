@@ -30,7 +30,8 @@ const { parseProduct, saveEcomProduct } = require('../lib/gmc-to-ecom')
 const testSaveProduct = async () => {
   const appSdk = await setup(null, true, admin.firestore())
   const appData = {
-    default_quantity: 10
+    default_quantity: 11,
+    update_product: true
   }
   const product = await saveEcomProduct(appSdk, appData, 1117, feedProduct)
   console.log('savedProduct', product)

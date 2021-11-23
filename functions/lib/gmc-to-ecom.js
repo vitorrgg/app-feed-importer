@@ -62,6 +62,7 @@ const parseProduct = async (appData, feedProduct) => {
 
 const saveEcomProduct = async (appSdk, appData, storeId, feedProduct) => {
   try {
+    storeId = storeId.toString()
     const parsedProduct = await parseProduct(appData, feedProduct)
     const { result } = await findEcomProductBySKU(appSdk, storeId, parsedProduct.sku)
     const productId = result.length > 0 ? result[0]._id : null
