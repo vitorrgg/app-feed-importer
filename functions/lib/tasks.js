@@ -88,7 +88,3 @@ exports.onEcomNotification = functions.firestore
       }
     }
   })
-
-module.exports = {
-  handleFeedQueue
-}
