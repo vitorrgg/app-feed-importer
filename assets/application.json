@@ -13,18 +13,42 @@
     "procedures": [
       "POST"
     ],
-    "products": [],
-    "brands": [],
-    "categories": [],
+    "products": [
+      "GET",
+      "POST",
+      "PATCH"
+    ],
+    "brands": [
+      "GET",
+      "POST",
+      "PATCH"
+    ],
+    "categories": [
+      "GET",
+      "POST",
+      "PATCH"
+    ],
     "customers": [],
     "orders": [],
     "carts": [],
     "orders/fulfillments": [],
     "orders/payments_history": [],
-    "products/quantity": [],
-    "products/variations/quantity": [],
-    "products/price": [],
-    "products/variations/price": []
+    "products/quantity": [
+      "GET",
+      "PUT"
+    ],
+    "products/variations/quantity": [
+      "GET",
+      "PUT"
+    ],
+    "products/price": [
+      "GET",
+      "PUT"
+    ],
+    "products/variations/price": [
+      "GET",
+      "PUT"
+    ]
   },
   "admin_settings": {
     "feed_url": {
