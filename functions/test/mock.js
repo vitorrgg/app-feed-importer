@@ -3,7 +3,6 @@ const serviceAccount = require(process.env.GOOGLE_APPLICATION_CREDENTIALS)
 
 const feedProduct = require('./mocks/product-feed.json')
 
-
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 })
@@ -11,7 +10,7 @@ admin.initializeApp({
 // const { handleFeedQueue } = require('../lib/tasks')
 
 const { setup } = require('@ecomplus/application-sdk')
-const { parseProduct } = require('../lib/gmc-to-ecom')
+const { parseProduct, saveEcomProduct } = require('../lib/gmc-to-ecom')
 
 // const testHandleFeedQueue = async () => {
 //   setup(null, true, admin.firestore())
@@ -19,12 +18,26 @@ const { parseProduct } = require('../lib/gmc-to-ecom')
 //   await handleFeedQueue(1117, feedUrl)
 // }
 
-const testParserProduct = async () => {
-  setup(null, true, admin.firestore())
-  const parsedProduct = await parseProduct(feedProduct)
-  console.log('parsedProduct', parsedProduct)
+// const testParserProduct = async () => {
+//   setup(null, true, admin.firestore())
+//   const appData = {
+//     // default_quantity: 10
+//   }
+//   const parsedProduct = await parseProduct(appData, feedProduct)
+//   console.log('parsedProduct', parsedProduct)
+// }
+
+const testSaveProduct = async () => {
+  const appSdk = await setup(null, true, admin.firestore())
+  const appData = {
+    default_quantity: 10
+  }
+  const product = await saveEcomProduct(appSdk, appData, 1117, feedProduct)
+  console.log('savedProduct', product)
 }
 
 // testHandleFeedQueue()
 
-testParserProduct()
+// testParserProduct()
+
+testSaveProduct()
