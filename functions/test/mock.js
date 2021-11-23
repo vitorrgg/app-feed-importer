@@ -10,7 +10,7 @@ admin.initializeApp({
 // const { handleFeedQueue } = require('../lib/tasks')
 
 const { setup } = require('@ecomplus/application-sdk')
-const { parseProduct, saveEcomProduct } = require('../lib/gmc-to-ecom')
+const { parseProduct, tryImageUpload, saveEcomProduct } = require('../lib/gmc-to-ecom')
 
 // const testHandleFeedQueue = async () => {
 //   setup(null, true, admin.firestore())
@@ -27,18 +27,30 @@ const { parseProduct, saveEcomProduct } = require('../lib/gmc-to-ecom')
 //   console.log('parsedProduct', parsedProduct)
 // }
 
-const testSaveProduct = async () => {
+// const testSaveProduct = async () => {
+//   const appSdk = await setup(null, true, admin.firestore())
+//   const appData = {
+//     default_quantity: 11,
+//     update_product: true
+//   }
+//   const product = await saveEcomProduct(appSdk, appData, 1117, feedProduct)
+//   console.log('savedProduct', product)
+// }
+
+const testTryImageUpload = async () => {
   const appSdk = await setup(null, true, admin.firestore())
   const appData = {
-    default_quantity: 11,
+    default_quantity: 3,
     update_product: true
   }
-  const product = await saveEcomProduct(appSdk, appData, 1117, feedProduct)
-  console.log('savedProduct', product)
+  const imageUpload = await tryImageUpload(appSdk, appData, feedProduct, tryImageUpload)
+  
 }
 
 // testHandleFeedQueue()
 
 // testParserProduct()
 
-testSaveProduct()
+// testSaveProduct()
+
+testTryImageUpload
