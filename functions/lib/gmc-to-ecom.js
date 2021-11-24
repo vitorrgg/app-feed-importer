@@ -4,6 +4,8 @@ const axios = require('axios')
 const ecomUtils = require('@ecomplus/utils')
 const FormData = require('form-data')
 
+const SPECIFICATION_MAP = require('./specifications-map')
+
 const findEcomProductBySKU = async (appSdk, storeId, sku) => {
   try {
     const resource = `/products.json?sku=${sku}`
@@ -19,6 +21,25 @@ const findEcomProductBySKU = async (appSdk, storeId, sku) => {
 
 const getFeedValueByKey = (key, data) => {
   return data[`g:${key}`] || data[key] || ''
+}
+
+const getSpecifications = (feedProduct) => {
+  const specifications = {}
+  for (const specification of SPECIFICATION_MAP) {
+    let feedSpecifications = getFeedValueByKey(specification.attribute, feedProduct)
+    feedSpecifications = Array.isArray(feedSpecifications) ? feedSpecifications : [feedSpecifications]
+    for (const feedSpecification of feedSpecifications) {
+      if (feedSpecification) {
+        specifications[specification.attribute] = [
+          {
+            text: feedSpecification,
+            value: typeof specification.formatter === 'function' ? specification.formater(feedSpecification) : feedSpecification
+          }
+        ]
+      }
+    }
+  }
+  return specifications
 }
 
 const tryImageUpload = async (storeId, auth, originImgUrl, product) => {
@@ -85,7 +106,7 @@ const parseProduct = async (appData, auth, storeId, feedProduct, product) => {
       },
       pictures: [],
       variations: [],
-      specifications: {}
+      specifications: getSpecifications(feedProduct)
     }
     const gtin = getFeedValueByKey('gtin', feedProduct)
     if (gtin) {
@@ -148,5 +169,6 @@ const saveEcomProduct = async (appSdk, appData, storeId, feedProduct) => {
 module.exports = {
   parseProduct,
   tryImageUpload,
-  saveEcomProduct
+  saveEcomProduct,
+  getSpecifications
 }

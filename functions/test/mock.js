@@ -10,7 +10,7 @@ admin.initializeApp({
 // const { handleFeedQueue } = require('../lib/tasks')
 
 const { setup } = require('@ecomplus/application-sdk')
-const { parseProduct, tryImageUpload, saveEcomProduct } = require('../lib/gmc-to-ecom')
+const { parseProduct, tryImageUpload, saveEcomProduct, getSpecifications } = require('../lib/gmc-to-ecom')
 
 // const testHandleFeedQueue = async () => {
 //   setup(null, true, admin.firestore())
@@ -46,6 +46,12 @@ const testSaveProduct = async () => {
 //   const imageUpload = await tryImageUpload(appSdk, appData, feedProduct, tryImageUpload)
 // }
 
+const testGetSpecifications = async () => {
+  await setup(null, true, admin.firestore())
+  const specifications = getSpecifications(feedProduct)
+  console.log('specifications', specifications)
+}
+
 // testHandleFeedQueue()
 
 // testParserProduct()
@@ -53,3 +59,5 @@ const testSaveProduct = async () => {
 testSaveProduct()
 
 // testTryImageUpload
+
+testGetSpecifications()
