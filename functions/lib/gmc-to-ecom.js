@@ -1,6 +1,8 @@
 const { logger } = require('firebase-functions')
 const slugify = require('slugify')
 const axios = require('axios')
+const ecomUtils = require('@ecomplus/utils')
+const FormData = require('form-data')
 
 const findEcomProductBySKU = async (appSdk, storeId, sku) => {
   try {
@@ -19,71 +21,52 @@ const getFeedValueByKey = (key, data) => {
   return data[`g:${key}`] || data[key] || ''
 }
 
-const tryImageUpload = (storeId, auth, originImgUrl, product) => new Promise(resolve => {
-  axios.get(originImgUrl, {
-    responseType: 'arraybuffer'
-  })
-    .then(({ data }) => {
-      const form = new FormData()
-      form.append('file', buffer.from(data), originImgUrl.replace(/.*\/([^/]+)$/, '$1'))
-
-      return axios.post(`https://apx-storage.e-com.plus/${storeId}/api/v1/upload.json`, form, {
-        headers: {
-          ...form.getHeaders(),
-          'X-Store-ID': storeId,
-          'X-My-ID': auth.myId,
-          'X-Acess-Token': auth.acessToken
-        }
-      })
-
-        .then(({ data, status }) => {
-          if (data.picture) {
-            for (const imgSize in data.picture) {
-              if (data.picture[imgSize]) {
-                if (!data.picture[imgSize].url) {
-                  delete data.picture[imgSize]
-                  continue
-
-                }
-                if (data.picture[imgSize].size !== undefined) {
-                  delete data.picture[imgSize].size()
-                }
-                data.picture[imgSize].alt = `${product.name} (${imgSize})`
-              }
-            }
-            if (Object.key(data.picture).length) {
-              return resolve({
-                _id: ecomUtils.randomObjectId(),
-                ...data.picture
-              })
-            }
-          }
-          const err = new Error('Unexpected Storage API responde')
-          err.response = { data, status }
-          throw err
-        })
-    })
-
-    .catch(err => {
-      console.error(err)
-      resolve({
-        _id: ecomUnits.randomObjectId(),
-        normal: {
-          url: oringinImgUrl,
-          alt: product.name
-        }
-      })
-    })
-}).then(picture => {
-  if (product && product.pictures) {
-    product.pictures.push(picture)
-  }
-  return picture
-})
-
-const parseProduct = async (appData, feedProduct) => {
+const tryImageUpload = async (storeId, auth, originImgUrl, product) => {
   try {
-    const product = {
+    const { data: imageToUpload } = await axios.get(originImgUrl, { responseType: 'arraybuffer' })
+    const form = new FormData()
+    form.append('file', Buffer.from(imageToUpload), originImgUrl.replace(/.*\/([^/]+)$/, '$1'))
+    const { data, status } = await axios.post(`https://apx-storage.e-com.plus/${storeId}/api/v1/upload.json`, form, {
+      headers: {
+        ...form.getHeaders(),
+        'X-Store-ID': storeId,
+        'X-My-ID': auth.myId,
+        'X-Access-Token': auth.accessToken
+      }
+    })
+
+    if (data.picture) {
+      for (const imgSize in data.picture) {
+        if (data.picture[imgSize]) {
+          if (!data.picture[imgSize].url) {
+            delete data.picture[imgSize]
+            continue
+          }
+          if (data.picture[imgSize].size !== undefined) {
+            delete data.picture[imgSize].size
+          }
+          data.picture[imgSize].alt = `${product.name} (${imgSize})`
+        }
+      }
+      if (Object.keys(data.picture).length) {
+        return {
+          _id: ecomUtils.randomObjectId(),
+          ...data.picture
+        }
+      }
+
+      const err = new Error('Unexpected Storage API responde')
+      err.response = { data, status }
+      throw err
+    }
+  } catch (error) {
+    logger.error('[PRODUCT-TO-ECOM:tryImageUpload | ERROR]', error)
+  }
+}
+
+const parseProduct = async (appData, auth, storeId, feedProduct, product) => {
+  try {
+    const newProductData = {
       sku: (getFeedValueByKey('id', feedProduct) || getFeedValueByKey('sku', feedProduct)).toString(),
       name: getFeedValueByKey('title', feedProduct),
       subtitle: getFeedValueByKey('subtitle', feedProduct),
@@ -116,6 +99,19 @@ const parseProduct = async (appData, feedProduct) => {
 
     product.quantity = quantity
 
+    product = Object.assign(product, newProductData)
+    const picturePromises = []
+
+    for (const image of getFeedValueByKey('additional_image_link', feedProduct) || []) {
+      picturePromises.push(tryImageUpload(storeId, auth, image, product))
+    }
+    product.pictures = await Promise.all(picturePromises) || []
+    const imageLink = getFeedValueByKey('image_link', feedProduct)
+    if (imageLink) {
+      product.pictures.push(await tryImageUpload(storeId, auth, imageLink, product))
+    }
+
+    delete product._id
     return product
   } catch (error) {
     logger.error('[PRODUCT-TO-ECOM:parseProduct | ERROR]', error)
@@ -125,18 +121,21 @@ const parseProduct = async (appData, feedProduct) => {
 const saveEcomProduct = async (appSdk, appData, storeId, feedProduct) => {
   try {
     storeId = storeId.toString()
-    const parsedProduct = await parseProduct(appData, feedProduct)
-    const { result } = await findEcomProductBySKU(appSdk, storeId, parsedProduct.sku)
-    const productId = result.length > 0 ? result[0]._id : null
-    const resource = productId ? `/products/${productId}.json` : '/products.json'
-    const method = productId ? 'PATCH' : 'POST'
+    const auth = await appSdk.getAuth(parseInt(storeId, 10))
+    const sku = (getFeedValueByKey('id', feedProduct) || getFeedValueByKey('sku', feedProduct)).toString()
+    const { result } = await findEcomProductBySKU(appSdk, storeId, sku)
+    const product = result.length > 0 ? result[0] : {}
+    const { _id } = product
+    const resource = _id ? `/products/${_id}.json` : '/products.json'
+    const method = _id ? 'PATCH' : 'POST'
+    const parsedProduct = await parseProduct(appData, auth, storeId, feedProduct, product)
     let ecomResponse = {}
 
     if (appData.update_product || method === 'POST') {
       const { response } = await appSdk.apiRequest(parseInt(storeId), resource, method, parsedProduct)
-      console.log(response.data)
-      ecomResponse = response.data || { _id: productId }
+      ecomResponse = response.data || { _id }
     }
+
     return ecomResponse
   } catch (error) {
     if (error && error.response) {

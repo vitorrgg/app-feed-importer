@@ -27,30 +27,29 @@ const { parseProduct, tryImageUpload, saveEcomProduct } = require('../lib/gmc-to
 //   console.log('parsedProduct', parsedProduct)
 // }
 
-// const testSaveProduct = async () => {
-//   const appSdk = await setup(null, true, admin.firestore())
-//   const appData = {
-//     default_quantity: 11,
-//     update_product: true
-//   }
-//   const product = await saveEcomProduct(appSdk, appData, 1117, feedProduct)
-//   console.log('savedProduct', product)
-// }
-
-const testTryImageUpload = async () => {
+const testSaveProduct = async () => {
   const appSdk = await setup(null, true, admin.firestore())
   const appData = {
-    default_quantity: 3,
+    default_quantity: 11,
     update_product: true
   }
-  const imageUpload = await tryImageUpload(appSdk, appData, feedProduct, tryImageUpload)
-  
+  const product = await saveEcomProduct(appSdk, appData, 1117, feedProduct)
+  console.log('savedProduct', product)
 }
+
+// const testTryImageUpload = async () => {
+//   const appSdk = await setup(null, true, admin.firestore())
+//   const appData = {
+//     default_quantity: 3,
+//     update_product: true
+//   }
+//   const imageUpload = await tryImageUpload(appSdk, appData, feedProduct, tryImageUpload)
+// }
 
 // testHandleFeedQueue()
 
 // testParserProduct()
 
-// testSaveProduct()
+testSaveProduct()
 
-testTryImageUpload
+// testTryImageUpload
