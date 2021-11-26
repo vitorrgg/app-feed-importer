@@ -10,6 +10,7 @@ const { logger } = require('firebase-functions')
 
 const addNotification = require('../utils/addNotification')
 const { saveEcomProduct } = require('./gmc-to-ecom')
+const _ = require('lodash')
 
 const getFeedItems = (feedData) => {
   const hasRssProperty = Object.prototype.hasOwnProperty.call(feedData, 'rss')
@@ -30,11 +31,26 @@ const handleFeedQueue = async (storeId, feedUrl) => {
     const { data: feedData } = await getFeed(feedUrl)
     const parsedFeed = xmlParser.parse(feedData)
     const products = getFeedItems(parsedFeed)
-    for (const product of products) {
+    const groupedProducts = _.groupBy(products, (item) => _.get(item, 'g:item_group_id', 'without_variations'))
+
+    const { without_variations: withoutVariations } = groupedProducts
+    delete groupedProducts.without_variations
+    for (const key of Object.keys(groupedProducts)) {
+      const trigger = {
+        resource: 'feed_create_product',
+        body: groupedProducts[key],
+        store_id: storeId,
+        isVariation: true
+      }
+      addNotification(admin, trigger)
+    }
+
+    for (const product of withoutVariations) {
       const trigger = {
         resource: 'feed_create_product',
         body: product,
-        store_id: storeId
+        store_id: storeId,
+        isVariation: false
       }
       addNotification(admin, trigger)
     }
@@ -43,6 +59,8 @@ const handleFeedQueue = async (storeId, feedUrl) => {
     throw error
   }
 }
+
+exports.handleFeedQueue = handleFeedQueue
 
 exports.onEcomNotification = functions.firestore
   .document('ecom_notifications/{documentId}')
@@ -53,9 +71,10 @@ exports.onEcomNotification = functions.firestore
     try {
       const appSdk = await setup(null, true, admin.firestore())
       const notification = snap.data()
-      const { resource, store_id: storeId, body } = notification
+      const { resource, store_id: storeId, body, isVariation } = notification
       const appData = await getAppData({ appSdk, storeId, auth })
-
+      const product = isVariation ? body[0] : body
+      const variations = isVariation ? body : []
       switch (resource) {
         case 'applications':
           if (body && body.feed_url) {
@@ -64,11 +83,7 @@ exports.onEcomNotification = functions.firestore
           break
 
         case 'feed_create_product':
-          await saveEcomProduct(appSdk, appData, storeId, body)
-          // fazer o parse do produto
-          // verificar se o produto já existe
-          // caso exista, atualiza | caso não exista cria
-          // Provavelmente vamos precisar ter um campo que pergunta se o usuário vai querer sobrescrer o produto
+          await saveEcomProduct(appSdk, appData, storeId, product, variations, isVariation)
           break
         default:
           break

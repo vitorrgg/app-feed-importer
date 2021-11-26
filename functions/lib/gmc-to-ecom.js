@@ -3,7 +3,7 @@ const slugify = require('slugify')
 const axios = require('axios')
 const ecomUtils = require('@ecomplus/utils')
 const FormData = require('form-data')
-
+const _ = require('lodash')
 const SPECIFICATION_MAP = require('./specifications-map')
 
 const findEcomProductBySKU = async (appSdk, storeId, sku) => {
@@ -25,15 +25,29 @@ const getFeedValueByKey = (key, data) => {
 
 const getSpecifications = (feedProduct) => {
   const specifications = {}
-  for (const specification of SPECIFICATION_MAP) {
-    let feedSpecifications = getFeedValueByKey(specification.attribute, feedProduct)
+  const itemGroupID = getFeedValueByKey('item_group_id', feedProduct)
+
+  const mappedSpecifications = itemGroupID
+    ? SPECIFICATION_MAP.filter(x => x.onlySpecification)
+    : SPECIFICATION_MAP
+
+  for (const specification of mappedSpecifications) {
+    let feedSpecifications = getFeedValueByKey(specification.gmcAttribute, feedProduct)
     feedSpecifications = Array.isArray(feedSpecifications) ? feedSpecifications : [feedSpecifications]
     for (const feedSpecification of feedSpecifications) {
       if (feedSpecification) {
+        const result = typeof specification.formatter === 'function'
+          ? specification.formatter(feedSpecification)
+          : feedSpecification
+        if (Array.isArray(result)) {
+          specifications[specification.attribute] = result
+          continue
+        }
+
         specifications[specification.attribute] = [
           {
             text: feedSpecification,
-            value: typeof specification.formatter === 'function' ? specification.formater(feedSpecification) : feedSpecification
+            value: result.toLowerCase()
           }
         ]
       }
@@ -85,7 +99,7 @@ const tryImageUpload = async (storeId, auth, originImgUrl, product) => {
   }
 }
 
-const parseProduct = async (appData, auth, storeId, feedProduct, product) => {
+const parseProduct = async (appData, auth, storeId, feedProduct, product = {}) => {
   try {
     const newProductData = {
       sku: (getFeedValueByKey('id', feedProduct) || getFeedValueByKey('sku', feedProduct)).toString(),
@@ -110,7 +124,7 @@ const parseProduct = async (appData, auth, storeId, feedProduct, product) => {
     }
     const gtin = getFeedValueByKey('gtin', feedProduct)
     if (gtin) {
-      product.gtin = [gtin.toString()]
+      newProductData.gtin = [gtin.toString()]
     }
 
     let quantity = 0
@@ -126,24 +140,58 @@ const parseProduct = async (appData, auth, storeId, feedProduct, product) => {
     for (const image of getFeedValueByKey('additional_image_link', feedProduct) || []) {
       picturePromises.push(tryImageUpload(storeId, auth, image, product))
     }
-    product.pictures = await Promise.all(picturePromises) || []
-    const imageLink = getFeedValueByKey('image_link', feedProduct)
-    if (imageLink) {
-      product.pictures.push(await tryImageUpload(storeId, auth, imageLink, product))
+
+    try {
+      const images = await Promise.allSettled(picturePromises) || []
+      product.pictures = _.compact(images.filter(image => image.status === 'fulfilled').map(x => x.value))
+      const imageLink = getFeedValueByKey('image_link', feedProduct)
+      if (imageLink) {
+        const otherImg = await tryImageUpload(storeId, auth, imageLink, product)
+        if (otherImg) {
+          product.pictures.push(otherImg)
+        }
+      }
+    } catch (error) {
+      console.log('error to save imageLink')
     }
 
     delete product._id
+    console.log(JSON.stringify(product))
     return product
   } catch (error) {
     logger.error('[PRODUCT-TO-ECOM:parseProduct | ERROR]', error)
   }
 }
 
-const saveEcomProduct = async (appSdk, appData, storeId, feedProduct) => {
+const parseVariations = async (appData, auth, storeId, feedVariation, variation = {}) => {
+  const variationKeys = [
+    'quantity',
+    'sku',
+    'name',
+    'base_price',
+    'price',
+    'weight',
+    'specifications'
+  ]
+
+  const parsedProduct = await parseProduct(appData, auth, storeId, feedVariation, variation)
+
+  const parsedVariation = {}
+  for (const key of Object.keys(parsedProduct)) {
+    if (variationKeys.includes(key)) {
+      parsedVariation[key] = parsedProduct[key]
+    }
+  }
+
+  parsedVariation._id = variation._id || ecomUtils.randomObjectId()
+
+  return parsedVariation
+}
+
+const saveEcomProduct = async (appSdk, appData, storeId, feedProduct, variations, isVariation) => {
   try {
-    storeId = storeId.toString()
     const auth = await appSdk.getAuth(parseInt(storeId, 10))
-    const sku = (getFeedValueByKey('id', feedProduct) || getFeedValueByKey('sku', feedProduct)).toString()
+    const sku = (getFeedValueByKey('sku', feedProduct) || getFeedValueByKey('id', feedProduct)).toString()
     const { result } = await findEcomProductBySKU(appSdk, storeId, sku)
     const product = result.length > 0 ? result[0] : {}
     const { _id } = product
@@ -155,9 +203,34 @@ const saveEcomProduct = async (appSdk, appData, storeId, feedProduct) => {
     if (appData.update_product || method === 'POST') {
       const { response } = await appSdk.apiRequest(parseInt(storeId), resource, method, parsedProduct)
       ecomResponse = response.data || { _id }
+      if (isVariation) {
+        const { result: savedProduct } = await findEcomProductBySKU(appSdk, storeId, sku)
+        await saveEcomVariations(appSdk, appData, storeId, variations, savedProduct[0])
+      }
     }
 
     return ecomResponse
+  } catch (error) {
+    if (error && error.response) {
+      logger.error({ data: error.response.data })
+    }
+    throw error
+  }
+}
+
+const saveEcomVariations = async (appSdk, appData, storeId, variations, product) => {
+  try {
+    const auth = await appSdk.getAuth(parseInt(storeId, 10))
+    const parsedVariations = []
+    for (const variation of variations) {
+      const sku = (getFeedValueByKey('sku', variations) || getFeedValueByKey('id', variations)).toString()
+      const variationFound = (product && product.variations && product.variations
+        .find(x => (x.sku || '').toString() === sku.toString())) || {}
+      const parsedVariation = await parseVariations(appData, auth, storeId, variation, variationFound)
+      parsedVariations.push(parsedVariation)
+    }
+
+    await appSdk.apiRequest(parseInt(storeId), `/products/${product._id}.json`, 'PATCH', { variations: parsedVariations })
   } catch (error) {
     if (error && error.response) {
       logger.error({ data: error.response.data })
@@ -170,5 +243,6 @@ module.exports = {
   parseProduct,
   tryImageUpload,
   saveEcomProduct,
+  saveEcomVariations,
   getSpecifications
 }

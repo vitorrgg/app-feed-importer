@@ -1,33 +1,53 @@
+const getColor = require('./colors-map')
+
 module.exports = [
   {
-    attribute: 'energy_efficiency_class'
+    attribute: 'energy_efficiency_class',
+    gmcAttribute: 'energy_efficiency_class'
   },
   {
-    attribute: 'age_group'
+    attribute: 'age_group',
+    gmcAttribute: 'age_group',
+    onlySpecification: true
   },
   {
-    attribute: 'gender'
+    attribute: 'gender',
+    gmcAttribute: 'gender',
+    onlySpecification: true
   },
   {
-    attribute: 'material'
+    attribute: 'material',
+    gmcAttribute: 'material'
   },
   {
-    attribute: 'pattern'
+    attribute: 'pattern',
+    gmcAttribute: 'pattern'
   },
   {
-    attribute: 'size'
+    attribute: 'size',
+    gmcAttribute: 'size'
   },
   {
-    attribute: 'size_type'
+    attribute: 'size_type',
+    gmcAttribute: 'size_type'
   },
   {
-    attribute: 'size_system'
+    attribute: 'size_system',
+    gmcAttribute: 'size_system'
   },
   {
     attribute: 'colors',
-    formatter: (value) => {
-      // need formatter color
-      return value
+    gmcAttribute: 'color',
+    formatter: (feedSpecification) => {
+      const colors = feedSpecification.split('/')
+      const specColors = []
+      for (const color of colors) {
+        specColors.push({
+          text: color,
+          value: getColor(color.toLowerCase())
+        })
+      }
+      return specColors
     }
   }
 ]
