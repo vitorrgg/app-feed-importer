@@ -8,36 +8,42 @@ module.exports = [
   {
     attribute: 'age_group',
     gmcAttribute: 'age_group',
-    onlySpecification: true
+    onlySpecification: false
   },
   {
     attribute: 'gender',
     gmcAttribute: 'gender',
-    onlySpecification: true
+    onlySpecification: false
   },
   {
     attribute: 'material',
-    gmcAttribute: 'material'
+    gmcAttribute: 'material',
+    isVariation: true
   },
   {
     attribute: 'pattern',
-    gmcAttribute: 'pattern'
+    gmcAttribute: 'pattern',
+    isVariation: true
   },
   {
     attribute: 'size',
-    gmcAttribute: 'size'
+    gmcAttribute: 'size',
+    isVariation: true
   },
   {
     attribute: 'size_type',
-    gmcAttribute: 'size_type'
+    gmcAttribute: 'size_type',
+    isVariation: true
   },
   {
     attribute: 'size_system',
-    gmcAttribute: 'size_system'
+    gmcAttribute: 'size_system',
+    isVariation: true
   },
   {
     attribute: 'colors',
     gmcAttribute: 'color',
+    isVariation: true,
     formatter: (feedSpecification) => {
       const colors = feedSpecification.split('/')
       const specColors = []

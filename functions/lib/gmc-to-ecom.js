@@ -28,7 +28,7 @@ const getSpecifications = (feedProduct) => {
   const itemGroupID = getFeedValueByKey('item_group_id', feedProduct)
 
   const mappedSpecifications = itemGroupID
-    ? SPECIFICATION_MAP.filter(x => x.onlySpecification)
+    ? SPECIFICATION_MAP.filter(x => x.isVariation)
     : SPECIFICATION_MAP
 
   for (const specification of mappedSpecifications) {
@@ -51,6 +51,14 @@ const getSpecifications = (feedProduct) => {
           }
         ]
       }
+    }
+
+    if (itemGroupID && !Object.keys(specifications).length) {
+      specifications.label = [
+        {
+          text: getFeedValueByKey('title', feedProduct), value: getFeedValueByKey('title', feedProduct)
+        }
+      ]
     }
   }
   return specifications
@@ -99,7 +107,7 @@ const tryImageUpload = async (storeId, auth, originImgUrl, product) => {
   }
 }
 
-const parseProduct = async (appData, auth, storeId, feedProduct, product = {}) => {
+const parseProduct = async (appData, auth, storeId, feedProduct, product = {}, uploadImages = true) => {
   try {
     const newProductData = {
       sku: (getFeedValueByKey('id', feedProduct) || getFeedValueByKey('sku', feedProduct)).toString(),
@@ -135,24 +143,24 @@ const parseProduct = async (appData, auth, storeId, feedProduct, product = {}) =
     product.quantity = quantity
 
     product = Object.assign(product, newProductData)
-    const picturePromises = []
-
-    for (const image of getFeedValueByKey('additional_image_link', feedProduct) || []) {
-      picturePromises.push(tryImageUpload(storeId, auth, image, product))
-    }
-
-    try {
-      const images = await Promise.allSettled(picturePromises) || []
-      product.pictures = _.compact(images.filter(image => image.status === 'fulfilled').map(x => x.value))
-      const imageLink = getFeedValueByKey('image_link', feedProduct)
-      if (imageLink) {
-        const otherImg = await tryImageUpload(storeId, auth, imageLink, product)
-        if (otherImg) {
-          product.pictures.push(otherImg)
-        }
+    if (uploadImages) {
+      const picturePromises = []
+      for (const image of getFeedValueByKey('additional_image_link', feedProduct) || []) {
+        picturePromises.push(tryImageUpload(storeId, auth, image, product))
       }
-    } catch (error) {
-      console.log('error to save imageLink')
+      try {
+        const images = await Promise.allSettled(picturePromises) || []
+        product.pictures = _.compact(images.filter(image => image.status === 'fulfilled').map(x => x.value))
+        const imageLink = getFeedValueByKey('image_link', feedProduct)
+        if (imageLink) {
+          const otherImg = await tryImageUpload(storeId, auth, imageLink, product)
+          if (otherImg) {
+            product.pictures.push(otherImg)
+          }
+        }
+      } catch (error) {
+        console.log('error to save imageLink')
+      }
     }
 
     delete product._id
@@ -174,7 +182,7 @@ const parseVariations = async (appData, auth, storeId, feedVariation, variation 
     'specifications'
   ]
 
-  const parsedProduct = await parseProduct(appData, auth, storeId, feedVariation, variation)
+  const parsedProduct = await parseProduct(appData, auth, storeId, feedVariation, variation, false)
 
   const parsedVariation = {}
   for (const key of Object.keys(parsedProduct)) {
