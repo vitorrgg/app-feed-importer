@@ -45,7 +45,7 @@ const handleFeedQueue = async (storeId, feedUrl) => {
       addNotification(admin, trigger)
     }
 
-    for (const product of withoutVariations) {
+    for (const product of withoutVariations || []) {
       const trigger = {
         resource: 'feed_create_product',
         body: product,
