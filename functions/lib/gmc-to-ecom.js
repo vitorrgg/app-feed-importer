@@ -142,25 +142,6 @@ const parseProduct = async (appData, auth, storeId, feedProduct, product = {}, u
     product.quantity = quantity
 
     product = Object.assign(product, newProductData)
-    if (uploadImages) {
-      const picturePromises = []
-      for (const image of getFeedValueByKey('additional_image_link', feedProduct) || []) {
-        picturePromises.push(tryImageUpload(storeId, auth, image, product))
-      }
-      try {
-        const images = await Promise.allSettled(picturePromises) || []
-        product.pictures = _.compact(images.filter(image => image.status === 'fulfilled').map(x => x.value))
-        const imageLink = getFeedValueByKey('image_link', feedProduct)
-        if (imageLink) {
-          const otherImg = await tryImageUpload(storeId, auth, imageLink, product)
-          if (otherImg) {
-            product.pictures.push(otherImg)
-          }
-        }
-      } catch (error) {
-        console.log('error to save imageLink')
-      }
-    }
 
     delete product._id
     console.log(JSON.stringify(product))
@@ -246,10 +227,37 @@ const saveEcomVariations = async (appSdk, appData, storeId, variations, product)
   }
 }
 
+const saveEcomImages = async (appSdk, storeId, productId, imageLinks) => {
+  try {
+    const auth = await appSdk.getAuth(parseInt(storeId, 10))
+    const resource = `products/${productId}.json`
+    const { response: product } = await appSdk.apiRequest(parseInt(storeId), resource, 'GET')
+    const pictures = []
+    for (const imageLink of imageLinks) {
+      try {
+        const newPicture = await tryImageUpload(storeId, auth, imageLink, product)
+        pictures.push(newPicture)
+      } catch (error) {
+        if (error && error.response) {
+          logger.error('saveEcomImages: error to save image ', { data: error.response.data })
+        }
+        logger.error('saveEcomImages: error to save image ', { error })
+      }
+    }
+    await appSdk.apiRequest(parseInt(storeId), resource, 'PATCH', { pictures })
+  } catch (error) {
+    if (error && error.response) {
+      logger.error({ data: error.response.data })
+    }
+    throw error
+  }
+}
+
 module.exports = {
   parseProduct,
   tryImageUpload,
   saveEcomProduct,
   saveEcomVariations,
-  getSpecifications
+  getSpecifications,
+  saveEcomImages
 }

@@ -9,7 +9,7 @@ const getAppData = require('./store-api/get-app-data')
 const { logger } = require('firebase-functions')
 
 const addNotification = require('../utils/addNotification')
-const { saveEcomProduct } = require('./gmc-to-ecom')
+const { saveEcomProduct, saveEcomImages } = require('./gmc-to-ecom')
 const _ = require('lodash')
 
 const getFeedItems = (feedData) => {
@@ -75,6 +75,11 @@ exports.onEcomNotification = functions.firestore
       const appData = await getAppData({ appSdk, storeId, auth })
       const product = isVariation ? body[0] : body
       const variations = isVariation ? body : []
+
+      let productId
+
+      const imageLinks = [product['g:image_link'], ...product['g:additional_image_link'] || []]
+
       switch (resource) {
         case 'applications':
           if (body && body.feed_url) {
@@ -83,7 +88,20 @@ exports.onEcomNotification = functions.firestore
           break
 
         case 'feed_create_product':
-          await saveEcomProduct(appSdk, appData, storeId, product, variations, isVariation)
+          productId = await saveEcomProduct(appSdk, appData, storeId, product, variations, isVariation)
+          if (productId && imageLinks.length) {
+            addNotification(admin, {
+              store_id: storeId,
+              resource: 'feed_import_image',
+              body: {
+                product_id: productId._id,
+                imageLinks
+              }
+            })
+          }
+          break
+        case 'feed_import_image':
+          await saveEcomImages(appSdk, storeId, body.product_id, body.imageLinks)
           break
         default:
           break

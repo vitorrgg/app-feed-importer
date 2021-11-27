@@ -32,6 +32,8 @@ const testHandleFeedQueue = async () => {
 //   console.log('parsedProduct', parsedProduct)
 // }
 
+// feedItems.map(x => { return { id: x['g:id'], images: _.compact(_.flattenDeep([x['g:additional_image_link'], x['g:image_link']]))}})
+
 const getFeedItems = (feedData) => {
   const hasRssProperty = Object.prototype.hasOwnProperty.call(feedData, 'rss')
 
