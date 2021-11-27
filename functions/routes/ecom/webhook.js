@@ -48,9 +48,8 @@ exports.post = ({ admin, appSdk }, req, res) => {
           if (Array.isArray(fields) && fields.includes('data')) {
             if (body.feed_url) {
               addNotification(admin, trigger)
+              updateAppData({ appSdk, storeId, auth }, { feed_url: '' })
             }
-
-            updateAppData({ appSdk, storeId, auth }, { feed_url: '' })
           }
           break
         default:

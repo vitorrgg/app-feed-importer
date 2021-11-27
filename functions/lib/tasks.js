@@ -78,7 +78,11 @@ exports.onEcomNotification = functions.firestore
 
       let productId
 
-      const imageLinks = [product['g:image_link'], ...product['g:additional_image_link'] || []]
+      const aditionalImages = Array.isArray(product['g:additional_image_link'])
+        ? product['g:additional_image_link']
+        : [product['g:additional_image_link']]
+
+      const imageLinks = _.compact([product['g:image_link'], ...(aditionalImages || [])])
 
       switch (resource) {
         case 'applications':
