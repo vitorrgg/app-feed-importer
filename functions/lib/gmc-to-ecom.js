@@ -53,7 +53,7 @@ const getSpecifications = (feedProduct) => {
       }
     }
 
-    if (itemGroupID && !Object.keys(specifications).length) {
+    if (itemGroupID && Object.keys(specifications) < 1) {
       specifications.label = [
         {
           text: getFeedValueByKey('title', feedProduct), value: getFeedValueByKey('title', feedProduct)
