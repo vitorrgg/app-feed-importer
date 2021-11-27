@@ -3,7 +3,6 @@ const slugify = require('slugify')
 const axios = require('axios')
 const ecomUtils = require('@ecomplus/utils')
 const FormData = require('form-data')
-const _ = require('lodash')
 const SPECIFICATION_MAP = require('./specifications-map')
 
 const findEcomProductBySKU = async (appSdk, storeId, sku) => {
@@ -63,6 +62,44 @@ const getSpecifications = (feedProduct) => {
   return specifications
 }
 
+const findBrandBySlug = async (appSdk, storeId, slug) => {
+  try {
+    const resource = `/brands.json?slug=${slug}`
+    const { response: { data } } = await appSdk.apiRequest(parseInt(storeId), resource, 'GET')
+    return data
+  } catch (error) {
+    if (error && error.response) {
+      logger.error({ data: error.response.data })
+    }
+    throw error
+  }
+}
+
+const getBrand = async (appSdk, storeId, feedProduct) => {
+  try {
+    const brandName = getFeedValueByKey('brand', feedProduct)
+    const brandSlug = slugify(brandName, { strict: true, replacement: '_', lower: true })
+    const brand = await findBrandBySlug(appSdk, storeId, brandSlug)
+
+    if (brand && Array.isArray(brand.result) && brand.result.length) {
+      const foundBrand = { _id: brand.result[0]._id, name: brand.result[0].name, slug: brand.result[0].slug }
+      return foundBrand
+    }
+
+    const newBrand = {
+      name: brandName,
+      slug: brandSlug
+    }
+    await appSdk.apiRequest(parseInt(storeId), '/brands.json', 'POST', newBrand)
+    return await getBrand(appSdk, storeId, feedProduct)
+  } catch (error) {
+    if (error && error.response) {
+      logger.error({ data: error.response.data })
+    }
+    throw error
+  }
+}
+
 const tryImageUpload = async (storeId, auth, originImgUrl, product) => {
   try {
     const { data: imageToUpload } = await axios.get(originImgUrl, { responseType: 'arraybuffer' })
@@ -106,7 +143,7 @@ const tryImageUpload = async (storeId, auth, originImgUrl, product) => {
   }
 }
 
-const parseProduct = async (appData, auth, storeId, feedProduct, product = {}, uploadImages = true) => {
+const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product = {}) => {
   try {
     const newProductData = {
       sku: (getFeedValueByKey('id', feedProduct) || getFeedValueByKey('sku', feedProduct)).toString(),
@@ -127,6 +164,7 @@ const parseProduct = async (appData, auth, storeId, feedProduct, product = {}, u
       },
       pictures: [],
       variations: [],
+      brands: [await getBrand(appSdk, storeId, feedProduct)],
       specifications: getSpecifications(feedProduct)
     }
     const gtin = getFeedValueByKey('gtin', feedProduct)
@@ -151,7 +189,7 @@ const parseProduct = async (appData, auth, storeId, feedProduct, product = {}, u
   }
 }
 
-const parseVariations = async (appData, auth, storeId, feedVariation, variation = {}) => {
+const parseVariations = async (appSdk, appData, auth, storeId, feedVariation, variation = {}) => {
   const variationKeys = [
     'quantity',
     'sku',
@@ -162,7 +200,7 @@ const parseVariations = async (appData, auth, storeId, feedVariation, variation 
     'specifications'
   ]
 
-  const parsedProduct = await parseProduct(appData, auth, storeId, feedVariation, variation, false)
+  const parsedProduct = await parseProduct(appSdk, appData, auth, storeId, feedVariation, variation)
 
   const parsedVariation = {}
   for (const key of Object.keys(parsedProduct)) {
@@ -185,7 +223,7 @@ const saveEcomProduct = async (appSdk, appData, storeId, feedProduct, variations
     const { _id } = product
     const resource = _id ? `/products/${_id}.json` : '/products.json'
     const method = _id ? 'PATCH' : 'POST'
-    const parsedProduct = await parseProduct(appData, auth, storeId, feedProduct, product)
+    const parsedProduct = await parseProduct(appSdk, appData, auth, storeId, feedProduct, product)
     let ecomResponse = {}
 
     if (appData.update_product || method === 'POST') {
@@ -214,7 +252,7 @@ const saveEcomVariations = async (appSdk, appData, storeId, variations, product)
       const sku = (getFeedValueByKey('sku', variations) || getFeedValueByKey('id', variations)).toString()
       const variationFound = (product && product.variations && product.variations
         .find(x => (x.sku || '').toString() === sku.toString())) || {}
-      const parsedVariation = await parseVariations(appData, auth, storeId, variation, variationFound)
+      const parsedVariation = await parseVariations(appSdk, appData, auth, storeId, variation, variationFound)
       parsedVariations.push(parsedVariation)
     }
 

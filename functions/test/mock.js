@@ -24,11 +24,11 @@ const testHandleFeedQueue = async () => {
 }
 
 // const testParserProduct = async () => {
-//   setup(null, true, admin.firestore())
+//   const appSdk = await setup(null, true, admin.firestore())
 //   const appData = {
 //     // default_quantity: 10
 //   }
-//   const parsedProduct = await parseProduct(appData, feedProduct)
+//   const parsedProduct = await parseProduct(appSdk, appData, feedProduct)
 //   console.log('parsedProduct', parsedProduct)
 // }
 

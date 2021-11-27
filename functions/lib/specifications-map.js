@@ -55,5 +55,77 @@ module.exports = [
       }
       return specColors
     }
+  },
+  {
+    attribute: 'custom_label_0',
+    gmcAttribute: 'custom_label_0',
+    isVariation: true,
+    formatter: (feedSpecification) => {
+      return [
+        {
+          text: feedSpecification, value: feedSpecification
+        }
+      ]
+    }
+  },
+  {
+    attribute: 'custom_label_0',
+    gmcAttribute: 'custom_label_0',
+    isVariation: true,
+    formatter: (feedSpecification) => {
+      return [
+        {
+          text: feedSpecification, value: feedSpecification
+        }
+      ]
+    }
+  },
+  {
+    attribute: 'custom_label_1',
+    gmcAttribute: 'custom_label_1',
+    isVariation: true,
+    formatter: (feedSpecification) => {
+      return [
+        {
+          text: feedSpecification, value: feedSpecification
+        }
+      ]
+    }
+  },
+  {
+    attribute: 'custom_label_2',
+    gmcAttribute: 'custom_label_2',
+    isVariation: true,
+    formatter: (feedSpecification) => {
+      return [
+        {
+          text: feedSpecification, value: feedSpecification
+        }
+      ]
+    }
+  },
+  {
+    attribute: 'custom_label_3',
+    gmcAttribute: 'custom_label_3',
+    isVariation: true,
+    formatter: (feedSpecification) => {
+      return [
+        {
+          text: feedSpecification, value: feedSpecification
+        }
+      ]
+    }
+  },
+  {
+    attribute: 'custom_label_4',
+    gmcAttribute: 'custom_label_4',
+    isVariation: true,
+    formatter: (feedSpecification) => {
+      return [
+        {
+          text: feedSpecification, value: feedSpecification
+        }
+      ]
+    }
   }
 ]
