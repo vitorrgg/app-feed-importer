@@ -52,14 +52,13 @@ const getSpecifications = (feedProduct) => {
         ]
       }
     }
-
-    if (itemGroupID && Object.keys(specifications) < 1) {
-      specifications.label = [
-        {
-          text: getFeedValueByKey('title', feedProduct), value: getFeedValueByKey('title', feedProduct)
-        }
-      ]
-    }
+  }
+  if (itemGroupID && !Object.keys(specifications).length) {
+    specifications.label = [
+      {
+        text: getFeedValueByKey('title', feedProduct), value: getFeedValueByKey('title', feedProduct)
+      }
+    ]
   }
   return specifications
 }

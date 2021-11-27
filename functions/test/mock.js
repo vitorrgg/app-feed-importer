@@ -48,7 +48,7 @@ const testSaveProduct = async () => {
     update_product: true
   }
 
-  const feedData = fs.readFileSync(path.join(__dirname, './google_shopping-2.xml'), { encoding: 'utf8', flag: 'r' })
+  const feedData = fs.readFileSync(path.join(__dirname, './example_feed_xml_rss.xml'), { encoding: 'utf8', flag: 'r' })
   const parsedFeed = xmlParser.parse(feedData)
   const feedProducts = getFeedItems(parsedFeed)
   const groupedProducts = _.groupBy(feedProducts, (item) => _.get(item, 'g:item_group_id', 'without_variations'))
