@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## 1.0.0 (2021-11-29)
+
+
+### Bug Fixes
+
+* **admin-settings:** fields typos ([f723bc9](https://github.com/ecomplus/application-starter/commit/f723bc91c1d05f5fed655b398f41005117b54b20))
+
 ## [1.0.0-starter.24](https://github.com/ecomplus/application-starter/compare/v1.0.0-starter.23...v1.0.0-starter.24) (2021-06-24)
 
 
