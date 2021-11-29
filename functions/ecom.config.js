@@ -146,16 +146,16 @@ const app = {
         type: 'string',
         maxLength: 255,
         format: 'uri',
-        title: 'URL do XML do google merchant center',
-        description: 'URL do arquivo XML do google merchant center que voce deseja importar para á E-com'
+        title: 'URL do feed de produtos',
+        description: 'XML com lista de produtos no formato do Google Merchant Center para importação'
       },
       hide: false
     },
     default_quantity:{
       schema: {
         type:'integer',
-        title: 'Saldo default para os produtos com estoque',
-        description: 'Informar o saldo default quando tiver disponibilidade'
+        title: 'Estoque padrão',
+        description: 'Saldo padrão para itens disponíveis para compra'
       }
     },
     update_product: {
@@ -163,7 +163,7 @@ const app = {
         type:'boolean',
         default: false,
         title: 'Sobrescrever produto',
-        description: 'Atualizar cadastro (não apenas estoque de produtos importados já existentes na plataforma'
+        description: 'Atualizar cadastro (não apenas estoque) de produtos importados já existentes na plataforma'
       },
       hide: true
     }
