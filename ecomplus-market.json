@@ -1,7 +1,7 @@
 {
   "app": {
-    "title": "GMC feed importer",
-    "short_description": "Este aplicativo importa os produtos de um feed xml do google merchant center",
+    "title": "Importador de feed XML",
+    "short_description": "Importação de produtos por feed XML no formato do GMC/Facebook",
     "category": "tools"
   }
 }
