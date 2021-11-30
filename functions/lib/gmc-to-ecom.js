@@ -4,6 +4,7 @@ const axios = require('axios')
 const ecomUtils = require('@ecomplus/utils')
 const FormData = require('form-data')
 const SPECIFICATION_MAP = require('./specifications-map')
+const htmlParser = require('node-html-parser')
 
 const findEcomProductBySKU = async (appSdk, storeId, sku) => {
   try {
@@ -77,7 +78,8 @@ const findBrandBySlug = async (appSdk, storeId, slug) => {
 
 const getBrand = async (appSdk, storeId, feedProduct) => {
   try {
-    const brandName = getFeedValueByKey('brand', feedProduct)
+    const gmcBrand = htmlParser.parse(getFeedValueByKey('brand', feedProduct) || '')
+    const brandName = gmcBrand.textContent.trim()
     const brandSlug = slugify(brandName, { strict: true, replacement: '_', lower: true })
     const brand = await findBrandBySlug(appSdk, storeId, brandSlug)
 
@@ -92,6 +94,46 @@ const getBrand = async (appSdk, storeId, feedProduct) => {
     }
     await appSdk.apiRequest(parseInt(storeId), '/brands.json', 'POST', newBrand)
     return await getBrand(appSdk, storeId, feedProduct)
+  } catch (error) {
+    if (error && error.response) {
+      logger.error({ data: error.response.data })
+    }
+    throw error
+  }
+}
+
+const findCategoryByName = async (appSdk, storeId, categoryName) => {
+  try {
+    const resource = `/categories.json?name=${categoryName}`
+    const { response: { data } } = await appSdk.apiRequest(parseInt(storeId), resource, 'GET')
+    return data
+  } catch (error) {
+    if (error && error.response) {
+      logger.error({ data: error.response.data })
+    }
+    throw error
+  }
+}
+
+const getCategory = async (appSdk, storeId, feedProduct) => {
+  try {
+    const gmcCategory = htmlParser.parse(getFeedValueByKey('google_product_category', feedProduct) || '')
+    if (gmcCategory) {
+      const categoryName = gmcCategory.textContent.split('>').reverse()[0].trim()
+      const categorySlug = slugify(categoryName, { strict: true, replacement: '_', lower: true })
+      const category = await findCategoryByName(appSdk, storeId, categoryName)
+      if (category && Array.isArray(category.result) && category.result.length) {
+        const foundCategory = { _id: category.result[0]._id, name: category.result[0].name, slug: category.result[0].slug }
+        return foundCategory
+      }
+
+      const newCategory = {
+        name: categoryName,
+        slug: categorySlug
+      }
+      await appSdk.apiRequest(parseInt(storeId), '/categories.json', 'POST', newCategory)
+      return await getCategory(appSdk, storeId, feedProduct)
+    }
   } catch (error) {
     if (error && error.response) {
       logger.error({ data: error.response.data })
@@ -151,7 +193,7 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
       subtitle: getFeedValueByKey('subtitle', feedProduct),
       meta_title: getFeedValueByKey('title', feedProduct),
       meta_description: getFeedValueByKey('description', feedProduct),
-      keywords: (getFeedValueByKey('google_product_category', feedProduct) || '').split('&gt;').map(x => x.trim().substring(0, 49)),
+      keywords: htmlParser.parse(getFeedValueByKey('google_product_category', feedProduct) || '').textContent.split('>').map(x => x.trim().substring(0, 49)),
       condition: getFeedValueByKey('condition', feedProduct),
       base_price: Number(getFeedValueByKey('price', feedProduct).replace(/[a-z A-Z]/g, '').trim()),
       price: Number(getFeedValueByKey('sale_price', feedProduct).replace(/[a-z A-Z]/g, '').trim()),
@@ -165,6 +207,7 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
       pictures: [],
       variations: [],
       brands: [await getBrand(appSdk, storeId, feedProduct)],
+      categories: [await getCategory(appSdk, storeId, feedProduct)],
       specifications: getSpecifications(feedProduct)
     }
     const gtin = getFeedValueByKey('gtin', feedProduct)

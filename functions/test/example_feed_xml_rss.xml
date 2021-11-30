@@ -106,7 +106,7 @@
 			<g:price>29.50 USD</g:price>
 					
 			<!-- The following attributes are required because this item is apparel -->
-			<g:google_product_category>Apparel &amp; Accessories &gt; Clothing &gt; Pants &gt; Jeans</g:google_product_category>
+			<g:google_product_category>Apparel &amp; Accessories &gt; Clothing &gt; Pants &gt; Jeans thiago</g:google_product_category>
 			<g:brand>M&amp;S</g:brand>
 			<g:gender>Female</g:gender>
 			<g:age_group>Adult</g:age_group>
