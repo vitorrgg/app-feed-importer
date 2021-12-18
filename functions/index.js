@@ -134,7 +134,6 @@ recursiveReadDir(routesDir).filter(filepath => filepath.endsWith('.js')).forEach
 server.use(router)
 
 exports[functionName] = functions.https.onRequest(server)
-exports.onEcomNotification = onEcomNotification
 
 console.log(`-- Starting '${app.title}' E-Com Plus app with Function '${functionName}'`)
 
