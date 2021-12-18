@@ -140,7 +140,7 @@ const run = async (snap) => {
       snap.ref.delete()
     }
 
-    if (notification.attempts && notification.attempts > 3) {
+    if (notification.attempts && notification.attempts >= 3) {
       admin.firestore().collection('ecom_notification_dead_letter_queue').add(snap.data())
       snap.ref.delete()
     }
