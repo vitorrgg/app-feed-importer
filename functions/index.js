@@ -4,7 +4,7 @@ const { functionName, operatorToken } = require('./__env')
 
 const path = require('path')
 const recursiveReadDir = require('./lib/recursive-read-dir')
-const { onEcomNotification } = require('./lib/tasks')
+const { handleWorker } = require('./lib/tasks')
 
 // Firebase SDKs to setup cloud functions and access Firestore database
 const admin = require('firebase-admin')
@@ -146,3 +146,10 @@ exports.updateTokens = functions.pubsub.schedule(cron).onRun(() => {
   })
 })
 console.log(`-- Sheduled update E-Com Plus tokens '${cron}'`)
+
+
+exports.worker = functions.pubsub.schedule('* * * *').onRun(() => {
+  return prepareAppSdk().then(appSdk => {
+    return handleWorker()
+  })
+})
