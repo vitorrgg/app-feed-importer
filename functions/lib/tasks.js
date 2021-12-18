@@ -171,7 +171,7 @@ const handleWorker = async () => {
       let query = notificationRef
       .where('ready_at', '<=', admin.firestore.Timestamp.now().toMillis())
       .orderBy('ready_at')
-      .limit(2)
+      .limit(10)
 
       const notificatioDocs = await query.get()      
       console.log('notification docs', notificatioDocs.empty)
