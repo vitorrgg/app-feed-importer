@@ -81,6 +81,9 @@ const getBrand = async (appSdk, storeId, feedProduct) => {
     const gmcBrand = htmlParser.parse(getFeedValueByKey('brand', feedProduct) || '')
     const brandName = gmcBrand.textContent.trim()
     const brandSlug = slugify(brandName, { strict: true, replacement: '_', lower: true })
+    if (brandSlug === '') {
+      return
+    }
     const brand = await findBrandBySlug(appSdk, storeId, brandSlug)
 
     if (brand && Array.isArray(brand.result) && brand.result.length) {
@@ -206,7 +209,7 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
       },
       pictures: [],
       variations: [],
-      brands: [await getBrand(appSdk, storeId, feedProduct)],
+      brands: await getBrand(appSdk, storeId, feedProduct) ? [await getBrand(appSdk, storeId, feedProduct)] : undefined,
       categories: [await getCategory(appSdk, storeId, feedProduct)],
       specifications: getSpecifications(feedProduct)
     }
