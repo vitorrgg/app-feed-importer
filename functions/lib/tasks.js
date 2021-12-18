@@ -114,7 +114,8 @@ const run = async (snap) => {
           hasError: true, 
           error: { status: error.response.status, data: error.response.data }, 
           attempts: parseInt(notification.attempts || 0 ) + 1,
-          ready_at: admin.firestore.Timestamp.now().toMillis() + 1000
+          ready_at: admin.firestore.Timestamp.now().toMillis() + 1000,
+          ...notification
         },
         { merge: true }
       )
@@ -126,7 +127,8 @@ const run = async (snap) => {
         hasError: true, 
         error: error.message,
         attempts: parseInt(notification.attempts || 0 ) + 1,
-        ready_at: admin.firestore.Timestamp.now().toMillis() + 1000
+        ready_at: admin.firestore.Timestamp.now().toMillis() + 1000,
+        ...notification
       }, 
       { merge: true }
     )
@@ -141,7 +143,7 @@ const run = async (snap) => {
     }
 
     if (notification.attempts && notification.attempts >= 3) {
-      admin.firestore().collection('ecom_notification_dead_letter_queue').add(snap.data())
+      admin.firestore().collection('ecom_notification_dead_letter_queue').add({ ...notification, ...snap.data() })
       snap.ref.delete()
     }
 
