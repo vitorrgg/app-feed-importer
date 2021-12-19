@@ -1,5 +1,4 @@
 
-const functions = require('firebase-functions')
 const admin = require('firebase-admin')
 const { auth } = require('firebase-admin')
 const axios = require('axios').default
@@ -111,12 +110,12 @@ const run = async (snap) => {
     if (error && error.response) {
       logger.error({ status: error.response.status, data: error.response.data })
       await snap.ref.set(
-        { 
-          hasError: true, 
-          error: { status: error.response.status, data: error.response.data }, 
-          attempts: parseInt(notification.attempts || 0 ) + 1,
-          ready_at: admin.firestore.Timestamp.now().toMillis() + 1000,
-          ...notification
+        {
+          ...notification,
+          hasError: true,
+          error: { status: error.response.status, data: error.response.data },
+          attempts: parseInt(notification.attempts || 0) + 1,
+          ready_at: admin.firestore.Timestamp.now().toMillis() + 500
         },
         { merge: true }
       )
@@ -124,19 +123,16 @@ const run = async (snap) => {
     }
 
     await snap.ref.set(
-      { 
-        hasError: true, 
+      {
+        ...notification,
+        hasError: true,
         error: error.message,
-        attempts: parseInt(notification.attempts || 0 ) + 1,
-        ready_at: admin.firestore.Timestamp.now().toMillis() + 1000,
-        ...notification
-      }, 
+        attempts: parseInt(notification.attempts || 0) + 1,
+        ready_at: admin.firestore.Timestamp.now().toMillis() + 500
+      },
       { merge: true }
     )
     logger.error(error)
-    
-
-
     return true
   } finally {
     if (!hasError) {
@@ -147,11 +143,8 @@ const run = async (snap) => {
       admin.firestore().collection('ecom_notification_dead_letter_queue').add({ ...notification, ...snap.data() })
       snap.ref.delete()
     }
-
   }
 }
-
-
 
 const handleWorker = async () => {
   const queueControllerRef = admin.firestore().collection('queue_controller')
@@ -159,7 +152,7 @@ const handleWorker = async () => {
   const queueDoc = await queueControllerRef.get()
   if (queueDoc.empty) {
     await queueControllerRef.add({
-      running: false,
+      running: false
     })
   }
 
@@ -170,13 +163,13 @@ const handleWorker = async () => {
     console.log('queueController', queueController.data())
     if (!queueController.data().running) {
       queueControllerRef.doc(queueController.id).set({ running: true }, { merge: true })
-      let notificationRef = admin.firestore().collection('ecom_notifications')
-      let query = notificationRef
-      .where('ready_at', '<=', admin.firestore.Timestamp.now().toMillis())
-      .orderBy('ready_at')
-      .limit(10)
+      const notificationRef = admin.firestore().collection('ecom_notifications')
+      const query = notificationRef
+        .where('ready_at', '<=', admin.firestore.Timestamp.now().toMillis())
+        .orderBy('ready_at')
+        .limit(20)
 
-      const notificatioDocs = await query.get()      
+      const notificatioDocs = await query.get()
       console.log('notification docs', notificatioDocs.empty)
       const docsToRun = []
       notificatioDocs.forEach(doc => {
