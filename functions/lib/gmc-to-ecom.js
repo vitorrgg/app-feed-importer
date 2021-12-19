@@ -199,7 +199,7 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
       name: getFeedValueByKey('title', feedProduct),
       subtitle: getFeedValueByKey('subtitle', feedProduct),
       meta_title: getFeedValueByKey('title', feedProduct),
-      meta_description: getFeedValueByKey('description', feedProduct),
+      meta_description: (getFeedValueByKey('description', feedProduct) || '').slice(0, 1000),
       keywords: htmlParser.parse(getFeedValueByKey('google_product_category', feedProduct) || '').textContent.split('>').map(x => x.trim().substring(0, 49)),      
       base_price: Number(getFeedValueByKey('price', feedProduct).replace(/[a-z A-Z]/g, '').trim()),
       price: Number(getFeedValueByKey('sale_price', feedProduct).replace(/[a-z A-Z]/g, '').trim()),
