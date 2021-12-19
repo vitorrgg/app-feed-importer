@@ -63,6 +63,7 @@ const handleFeedQueue = async (storeId, feedUrl) => {
 const run = async (snap) => {
   let hasError = false
   const notification = snap.data()
+  console.log(notification, '===========')
   logger.info('[ecomNotification:start task]', JSON.stringify(notification))
   try {
     const appSdk = await setup(null, true, admin.firestore())
@@ -194,5 +195,6 @@ const handleWorker = async () => {
 
 module.exports = {
   handleFeedQueue,
-  handleWorker
+  handleWorker,
+  run
 }

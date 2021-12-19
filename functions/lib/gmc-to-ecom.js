@@ -107,9 +107,11 @@ const getBrand = async (appSdk, storeId, feedProduct) => {
 
 const findCategoryByName = async (appSdk, storeId, categoryName) => {
   try {
-    const resource = `/categories.json?name=${categoryName}`
-    const { response: { data } } = await appSdk.apiRequest(parseInt(storeId), resource, 'GET')
-    return data
+    if (findCategoryByName) {
+      const resource = `/categories.json?name=${categoryName}`
+      const { response: { data } } = await appSdk.apiRequest(parseInt(storeId), resource, 'GET')
+      return data
+    }
   } catch (error) {
     if (error && error.response) {
       logger.error({ data: error.response.data })
@@ -121,7 +123,7 @@ const findCategoryByName = async (appSdk, storeId, categoryName) => {
 const getCategory = async (appSdk, storeId, feedProduct) => {
   try {
     const gmcCategory = htmlParser.parse(getFeedValueByKey('google_product_category', feedProduct) || '')
-    if (gmcCategory) {
+    if (gmcCategory.textContent) {
       const categoryName = gmcCategory.textContent.split('>').reverse()[0].trim()
       const categorySlug = slugify(categoryName, { strict: true, replacement: '_', lower: true })
       const category = await findCategoryByName(appSdk, storeId, categoryName)
@@ -190,14 +192,15 @@ const tryImageUpload = async (storeId, auth, originImgUrl, product) => {
 
 const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product = {}) => {
   try {
+    const categories = await getCategory(appSdk, storeId, feedProduct)
+    const condition = getFeedValueByKey('condition', feedProduct)
     const newProductData = {
       sku: (getFeedValueByKey('id', feedProduct) || getFeedValueByKey('sku', feedProduct)).toString(),
       name: getFeedValueByKey('title', feedProduct),
       subtitle: getFeedValueByKey('subtitle', feedProduct),
       meta_title: getFeedValueByKey('title', feedProduct),
       meta_description: getFeedValueByKey('description', feedProduct),
-      keywords: htmlParser.parse(getFeedValueByKey('google_product_category', feedProduct) || '').textContent.split('>').map(x => x.trim().substring(0, 49)),
-      condition: getFeedValueByKey('condition', feedProduct),
+      keywords: htmlParser.parse(getFeedValueByKey('google_product_category', feedProduct) || '').textContent.split('>').map(x => x.trim().substring(0, 49)),      
       base_price: Number(getFeedValueByKey('price', feedProduct).replace(/[a-z A-Z]/g, '').trim()),
       price: Number(getFeedValueByKey('sale_price', feedProduct).replace(/[a-z A-Z]/g, '').trim()),
       quantity: 0, // get on availability
@@ -210,12 +213,15 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
       pictures: [],
       variations: [],
       brands: await getBrand(appSdk, storeId, feedProduct) ? [await getBrand(appSdk, storeId, feedProduct)] : undefined,
-      categories: [await getCategory(appSdk, storeId, feedProduct)],
+      categories: categories ? [categories] : [],
       specifications: getSpecifications(feedProduct)
     }
     const gtin = getFeedValueByKey('gtin', feedProduct)
     if (gtin) {
       newProductData.gtin = [gtin.toString()]
+    }
+    if (condition) {
+      newProductData.condition = condition
     }
 
     let quantity = 0
@@ -228,7 +234,8 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
     product = Object.assign(product, newProductData)
 
     delete product._id
-    console.log(JSON.stringify(product))
+    console.log('[PARSED PRODUCT]', product)
+    logger.log('[PRODUCT-TO-ECOM:parseProduct | SUCCESS]', JSON.stringify(product))
     return product
   } catch (error) {
     logger.error('[PRODUCT-TO-ECOM:parseProduct | ERROR]', error)
