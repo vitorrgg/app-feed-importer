@@ -217,6 +217,9 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
       specifications: getSpecifications(feedProduct)
     }
     const gtin = getFeedValueByKey('gtin', feedProduct)
+    if (!newProductData.price) {
+      newProductData.price = newProductData.base_price
+    }
     if (gtin) {
       newProductData.gtin = [gtin.toString()]
     }
