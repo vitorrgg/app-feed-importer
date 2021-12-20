@@ -11,6 +11,8 @@ const addNotification = require('../utils/addNotification')
 const { saveEcomProduct, saveEcomImages } = require('./gmc-to-ecom')
 const _ = require('lodash')
 
+const { differenceInMinutes } = require('date-fns')
+
 const getFeedItems = (feedData) => {
   const hasRssProperty = Object.prototype.hasOwnProperty.call(feedData, 'rss')
 
@@ -183,6 +185,13 @@ const handleWorker = async () => {
     console.log(error)
     queueControllerRef.doc(queueController.id)
       .set({ running: false, last_excution: admin.firestore.Timestamp.now() })
+  } finally {
+    const lastExcution = queueController.data().last_excution
+    if (differenceInMinutes(admin.firestore.Timestamp.now(), lastExcution) > 2) {
+      queueControllerRef.doc(queueController.id)
+      .set({ running: false, last_excution: admin.firestore.Timestamp.now() })
+      logger.info('[handleWorker]: changed running to false because has more 2 minutes inactivity')
+    }
   }
 }
 
