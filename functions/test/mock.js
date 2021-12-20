@@ -8,6 +8,7 @@ const serviceAccount = require(process.env.GOOGLE_APPLICATION_CREDENTIALS)
 // const fs = require('fs')
 // const path = require('path')
 // const axios = require('axios').default
+const { differenceInMinutes } = require('date-fns')
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
@@ -70,4 +71,25 @@ const testSize = async () => {
   })
 }
 
+const testChangeLastExcution = async () => {
+  const queueControllerRef = admin.firestore().collection('queue_controller')
+
+  const queueDoc = await queueControllerRef.get()
+  if (queueDoc.empty) {
+    await queueControllerRef.add({
+      running: false
+    })
+  }
+
+  const queueControllerSnap = await queueControllerRef.get()
+  const queueController = queueControllerSnap.docs[0]
+  const lastExcution = queueController.data().last_excution
+
+  console.log(queueController.data())
+  console.log(admin.firestore.Timestamp.now(), lastExcution)
+  console.log('DIFFERENCE', differenceInMinutes(admin.firestore.Timestamp.now().toDate(), lastExcution.toDate()))
+  console.log('MORE 2 MINUTES', differenceInMinutes(admin.firestore.Timestamp.now(), lastExcution) > 2)
+}
+
 testSize()
+testChangeLastExcution()
