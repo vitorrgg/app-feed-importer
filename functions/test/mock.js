@@ -1,17 +1,17 @@
-// const admin = require('firebase-admin')
-// const serviceAccount = require(process.env.GOOGLE_APPLICATION_CREDENTIALS)
+const admin = require('firebase-admin')
+const serviceAccount = require(process.env.GOOGLE_APPLICATION_CREDENTIALS)
 // const _ = require('lodash')
 // const { auth } = require('firebase-admin')
 // const getAppData = require('./../lib/store-api/get-app-data')
 
-// // const feedProduct = require('./mocks/product-feed.json')
+// const feedProduct = require('./mocks/product-feed.json')
 // const fs = require('fs')
 // const path = require('path')
 // const axios = require('axios').default
 
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount)
-// })
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+})
 
 // // const { handleFeedQueue } = require('../lib/tasks')
 
@@ -64,10 +64,10 @@
 
 // testParseProduct()
 
-// const testSize = async () => {
-//   admin.firestore().collection('ecom_notifications').get().then(snap => {
-//     console.log(snap.size) // will return the collection size
-//   })
-// }
+const testSize = async () => {
+  admin.firestore().collection('ecom_notifications').where('resource', '==', 'feed_import_image').get().then(snap => {
+    console.log(snap.size) // will return the collection size
+  })
+}
 
-// testSize()
+testSize()

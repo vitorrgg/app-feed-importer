@@ -323,6 +323,7 @@ const saveEcomVariations = async (appSdk, appData, storeId, variations, product)
 
 const saveEcomImages = async (appSdk, storeId, productId, imageLinks) => {
   try {
+    logger.info('saveEcomImages: start try to save image ', { storeId, productId, imageLinks })
     const auth = await appSdk.getAuth(parseInt(storeId, 10))
     const resource = `products/${productId}.json`
     const { response: product } = await appSdk.apiRequest(parseInt(storeId), resource, 'GET')
