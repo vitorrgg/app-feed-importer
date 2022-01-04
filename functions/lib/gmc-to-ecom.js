@@ -200,7 +200,7 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
       subtitle: getFeedValueByKey('subtitle', feedProduct),
       meta_title: getFeedValueByKey('title', feedProduct),
       meta_description: (getFeedValueByKey('description', feedProduct) || '').slice(0, 1000),
-      keywords: htmlParser.parse(getFeedValueByKey('google_product_category', feedProduct) || '').textContent.split('>').map(x => x.trim().substring(0, 49)),      
+      keywords: htmlParser.parse(getFeedValueByKey('google_product_category', feedProduct) || '').textContent.split('>').map(x => x.trim().substring(0, 49)),
       base_price: Number(getFeedValueByKey('price', feedProduct).replace(/[a-z A-Z]/g, '').trim()),
       price: Number(getFeedValueByKey('sale_price', feedProduct).replace(/[a-z A-Z]/g, '').trim()),
       quantity: 0, // get on availability
@@ -280,6 +280,7 @@ const saveEcomProduct = async (appSdk, appData, storeId, feedProduct, variations
     const resource = _id ? `/products/${_id}.json` : '/products.json'
     const method = _id ? 'PATCH' : 'POST'
     const parsedProduct = await parseProduct(appSdk, appData, auth, storeId, feedProduct, product)
+    console.log(parsedProduct)
     let ecomResponse = {}
 
     if (appData.update_product || method === 'POST') {

@@ -189,7 +189,7 @@ const handleWorker = async () => {
     const lastExcution = queueController.data().last_excution
     if (differenceInMinutes(admin.firestore.Timestamp.now().toDate(), lastExcution.toDate()) > 2) {
       queueControllerRef.doc(queueController.id)
-      .set({ running: false, last_excution: admin.firestore.Timestamp.now() })
+        .set({ running: false, last_excution: admin.firestore.Timestamp.now() })
       logger.info('[handleWorker]: changed running to false because has more 2 minutes inactivity')
     }
   }
