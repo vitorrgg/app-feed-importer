@@ -1,6 +1,5 @@
 const ExcelJS = require('exceljs')
 const slugify = require('slugify')
-const fs = require('fs')
 const { Duplex } = require('stream')
 
 const MAPPED_COLUMNS = [

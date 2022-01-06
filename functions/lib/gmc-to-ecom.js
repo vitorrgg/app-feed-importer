@@ -205,7 +205,6 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
       price: Number(getFeedValueByKey('sale_price', feedProduct).replace(/[a-z A-Z]/g, '').trim()),
       quantity: 0, // get on availability
       body_html: getFeedValueByKey('description', feedProduct),
-      slug: slugify(getFeedValueByKey('title', feedProduct), { strict: true, replacement: '_', lower: true }),
       weight: {
         value: Number(getFeedValueByKey('shipping_weight', feedProduct).split(' ')[0]),
         unit: getFeedValueByKey('shipping_weight', feedProduct).split(' ')[1]
@@ -216,6 +215,12 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
       categories: categories ? [categories] : [],
       specifications: getSpecifications(feedProduct)
     }
+
+    const slug = slugify(getFeedValueByKey('title', feedProduct), { strict: true, replacement: '_', lower: true })
+    if (slug) {
+      newProductData.slug = slug
+    }
+
     const gtin = getFeedValueByKey('gtin', feedProduct)
     if (!newProductData.price) {
       newProductData.price = newProductData.base_price
