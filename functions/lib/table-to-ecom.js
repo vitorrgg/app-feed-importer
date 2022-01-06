@@ -176,7 +176,10 @@ const MAPPED_COLUMNS = [
   },
   {
     tableColumn: 'peso-em-kg',
-    feedColumn: 'g:shipping_weight'
+    feedColumn: 'g:shipping_weight',
+    parser: (_, value) => {
+      return `${value || '0'} kg`
+    }
   }
 ]
 
