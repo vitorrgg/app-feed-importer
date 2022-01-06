@@ -119,7 +119,7 @@ const run = async (snap) => {
         await saveEcomImages(appSdk, storeId, body.product_id, body.imageLinks)
         break
       case 'feed_import_table':
-        await handleFeedTableQueue(body)
+        await handleFeedTableQueue(notification)
         break
       default:
         break

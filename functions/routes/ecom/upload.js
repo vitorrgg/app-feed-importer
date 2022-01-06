@@ -4,8 +4,6 @@ const os = require('os')
 const busboy = require('busboy')
 const { v4: uuid } = require('uuid')
 
-const admin = require('firebase-admin')
-const { parseProduct } = require('../../lib/table-to-ecom')
 const addNotification = require('../../utils/addNotification')
 
 exports.post = async ({ admin, appSdk }, req, res) => {
