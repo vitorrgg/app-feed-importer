@@ -19,6 +19,7 @@ admin.initializeApp({
 const { setup } = require('@ecomplus/application-sdk')
 const { parseProduct, tryImageUpload, saveEcomProduct, getSpecifications } = require('../lib/gmc-to-ecom')
 const xmlParser = require('fast-xml-parser')
+const { handleFeedTableQueue } = require('../lib/tasks')
 // const { handleFeedQueue, handleWorker, run } = require('../lib/tasks')
 
 // const testHandleFeedQueue = async () => {

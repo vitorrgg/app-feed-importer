@@ -226,6 +226,7 @@ const handleWorker = async () => {
 }
 
 module.exports = {
+  handleFeedTableQueue,
   handleFeedQueue,
   handleWorker,
   run

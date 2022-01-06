@@ -223,8 +223,7 @@ const parseProduct = async (buffer, contentType) => {
         values.push(data)
       }
     })
-
-    console.log(values)
+    return values
   } catch (error) {
     console.error(error)
   }
