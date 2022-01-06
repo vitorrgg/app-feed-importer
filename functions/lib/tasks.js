@@ -13,6 +13,8 @@ const _ = require('lodash')
 
 const { differenceInMinutes } = require('date-fns')
 
+const tableToEcom = require('./table-to-ecom')
+
 const getFeedItems = (feedData) => {
   const hasRssProperty = Object.prototype.hasOwnProperty.call(feedData, 'rss')
 
@@ -26,12 +28,9 @@ const getFeed = async (feedUrl) => {
   return axios.get(feedUrl)
 }
 
-const handleFeedQueue = async (storeId, feedUrl) => {
+const handleFeedQueue = async (storeId, products) => {
   try {
-    logger.info('[handleFeedQueue]', JSON.stringify({ storeId, feedUrl }))
-    const { data: feedData } = await getFeed(feedUrl)
-    const parsedFeed = xmlParser.parse(feedData)
-    const products = getFeedItems(parsedFeed)
+    logger.info('[handleFeedQueue]', JSON.stringify({ storeId }))
     const groupedProducts = _.groupBy(products, (item) => _.get(item, 'g:item_group_id', 'without_variations'))
 
     const { without_variations: withoutVariations } = groupedProducts
@@ -61,10 +60,25 @@ const handleFeedQueue = async (storeId, feedUrl) => {
   }
 }
 
+const handleFeedXmlQueue = async (storeId, feedUrl) => {
+  logger.info('[handleFeedQueue]', JSON.stringify({ storeId, feedUrl }))
+  const { data: feedData } = await getFeed(feedUrl)
+  const parsedFeed = xmlParser.parse(feedData)
+  const products = getFeedItems(parsedFeed)
+  await handleFeedQueue(storeId, products)
+}
+
+const handleFeedTableQueue = async (notification) => {
+  const { body, store_id: storeId } = notification
+  const storageBucket = admin.storage().bucket('gs://ecom-feed-importer.appspot.com')
+  const [data] = await storageBucket.file(body.file_id).download()
+  const products = await tableToEcom.parseProduct(data, body.contentType)
+  await handleFeedQueue(storeId, products)
+}
+
 const run = async (snap) => {
   let hasError = false
   const notification = snap.data()
-  console.log(notification, '===========')
   logger.info('[ecomNotification:start task]', JSON.stringify(notification))
   try {
     const appSdk = await setup(null, true, admin.firestore())
@@ -84,7 +98,7 @@ const run = async (snap) => {
     switch (resource) {
       case 'applications':
         if (body && body.feed_url) {
-          await handleFeedQueue(storeId, body.feed_url)
+          await handleFeedXmlQueue(storeId, body.feed_url)
         }
         break
 
@@ -103,6 +117,9 @@ const run = async (snap) => {
         break
       case 'feed_import_image':
         await saveEcomImages(appSdk, storeId, body.product_id, body.imageLinks)
+        break
+      case 'feed_import_table':
+        await handleFeedTableQueue(body)
         break
       default:
         break
@@ -171,13 +188,15 @@ const handleWorker = async () => {
         .orderBy('ready_at')
         .limit(20)
 
-      const notificatioDocs = await query.get()
-      console.log('notification docs', notificatioDocs.empty)
-      const docsToRun = []
-      notificatioDocs.forEach(doc => {
-        docsToRun.push(run(doc))
-      })
-      await Promise.allSettled(docsToRun)
+      const notificationDocs = await query.get()
+      console.log('notification docs', notificationDocs.empty)
+      if (!notificationDocs.empty) {
+        const docsToRun = []
+        notificationDocs.forEach(doc => {
+          docsToRun.push(run(doc))
+        })
+        await Promise.allSettled(docsToRun)
+      }
       queueControllerRef.doc(queueController.id)
         .set({ running: false, last_excution: admin.firestore.Timestamp.now() })
     }

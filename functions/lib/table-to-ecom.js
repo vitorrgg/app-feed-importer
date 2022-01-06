@@ -1,6 +1,7 @@
 const ExcelJS = require('exceljs')
-const path = require('path')
 const slugify = require('slugify')
+const fs = require('fs')
+const { Duplex } = require('stream')
 
 const MAPPED_COLUMNS = [
   {
@@ -184,10 +185,18 @@ const getKey = (key) => {
   return slugify(key, { strict: true, replacet: '_', lower: true })
 }
 
-const parseProduct = async () => {
+const parseProduct = async (buffer, contentType) => {
   try {
     const workbook = new ExcelJS.Workbook()
-    const worksheet = await workbook.csv.readFile(path.join(__dirname, '..', 'test', 'lojaintegrada.csv'), { parserOptions: { delimiter: ';' } })
+    let worksheet
+    if (contentType === 'text/csv') {
+      const stream = new Duplex()
+      stream.push(buffer)
+      stream.push(null)
+      worksheet = await workbook.csv.read(stream, { parserOptions: { delimiter: ';' } })
+    } else {
+      worksheet = await workbook.xlsx.load(buffer, { parserOptions: { delimiter: ';' } })
+    }
     const values = []
     const columns = []
     worksheet.eachRow((row, index) => {
@@ -221,8 +230,6 @@ const parseProduct = async () => {
   }
 }
 
-const run = async () => {
-  parseProduct()
+module.exports = {
+  parseProduct
 }
-
-run()
