@@ -61,19 +61,30 @@ const handleFeedQueue = async (storeId, products) => {
 }
 
 const handleFeedXmlQueue = async (storeId, feedUrl) => {
-  logger.info('[handleFeedQueue]', JSON.stringify({ storeId, feedUrl }))
-  const { data: feedData } = await getFeed(feedUrl)
-  const parsedFeed = xmlParser.parse(feedData)
-  const products = getFeedItems(parsedFeed)
-  await handleFeedQueue(storeId, products)
+  try {
+    logger.info('[handleFeedXmlQueue]', JSON.stringify({ storeId, feedUrl }))
+    const { data: feedData } = await getFeed(feedUrl)
+    const parsedFeed = xmlParser.parse(feedData)
+    const products = getFeedItems(parsedFeed)
+    await handleFeedQueue(storeId, products)
+  } catch (error) {
+    logger.error('[handleFeedXmlQueue:error]', { error })
+    throw error
+  }
 }
 
 const handleFeedTableQueue = async (notification) => {
-  const { body, store_id: storeId } = notification
-  const storageBucket = admin.storage().bucket('gs://ecom-feed-importer.appspot.com')
-  const [data] = await storageBucket.file(body.file_id).download()
-  const products = await tableToEcom.parseProduct(data, body.contentType)
-  await handleFeedQueue(storeId, products)
+  try {
+    const { body, store_id: storeId } = notification
+    const storageBucket = admin.storage().bucket('gs://ecom-feed-importer.appspot.com')
+    const [data] = await storageBucket.file(body.file_id).download()
+    logger.info('[tableToEcom.parseProduct:start]', JSON.stringify(notification))
+    const products = await tableToEcom.parseProduct(data, body.contentType)
+    await handleFeedQueue(storeId, products)
+  } catch (error) {
+    logger.error('[tableToEcom.parseProduct:error]', { error })
+    throw error
+  }
 }
 
 const run = async (snap) => {
