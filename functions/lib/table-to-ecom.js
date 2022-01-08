@@ -9,7 +9,7 @@ const MAPPED_COLUMNS = [
   },
   {
     tableColumn: 'nome',
-    feedColumn: 'g:title', 
+    feedColumn: 'g:title',
     parser: (_, value) => {
       console.log(value)
       return value
@@ -199,9 +199,9 @@ const parseProduct = async (buffer, contentType) => {
       const stream = new Duplex()
       stream.push(buffer)
       stream.push(null)
-      worksheet = await workbook.csv.read(stream, { parserOptions: { delimiter: ';' } })
+      worksheet = await workbook.csv.read(stream, { parserOptions: { delimiter: ';', escape: true } })
     } else {
-      worksheet = await workbook.xlsx.load(buffer, { parserOptions: { delimiter: ';' } })
+      worksheet = await workbook.xlsx.load(buffer, { parserOptions: { delimiter: ';', escape: true } })
     }
     const values = []
     const columns = []
