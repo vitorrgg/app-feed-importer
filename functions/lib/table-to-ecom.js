@@ -9,7 +9,11 @@ const MAPPED_COLUMNS = [
   },
   {
     tableColumn: 'nome',
-    feedColumn: 'g:title'
+    feedColumn: 'g:title', 
+    parser: (_, value) => {
+      console.log(value)
+      return value
+    }
   },
   {
     tableColumn: 'requerida-sku',
@@ -225,6 +229,7 @@ const parseProduct = async (buffer, contentType) => {
         values.push(data)
       }
     })
+    console.log(values)
     return values
   } catch (error) {
     console.error(error)

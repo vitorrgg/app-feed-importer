@@ -6,13 +6,15 @@ const FormData = require('form-data')
 const SPECIFICATION_MAP = require('./specifications-map')
 const htmlParser = require('node-html-parser')
 
-const findEcomProductBySKU = async (appSdk, storeId, sku) => {
+const findEcomProductBySKU = async (appSdk, storeId, sku, meta = {}) => {
+  const resource = `/products.json?sku=${sku}`
+  meta.findEcomProductBySKU = { resource, sku, method: 'GET ' }
   try {
-    const resource = `/products.json?sku=${sku}`
     const { response: { data } } = await appSdk.apiRequest(parseInt(storeId), resource, 'GET')
     return data
   } catch (error) {
     if (error && error.response) {
+      meta.findEcomProductBySKU = { resource, sku, method: 'GET ', data: { error: error.response, config: error.response.config } }
       logger.error({ data: error.response.data })
     }
     throw error
@@ -211,9 +213,13 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
       },
       pictures: [],
       variations: [],
-      brands: await getBrand(appSdk, storeId, feedProduct) ? [await getBrand(appSdk, storeId, feedProduct)] : undefined,
       categories: categories ? [categories] : [],
       specifications: getSpecifications(feedProduct)
+    }
+
+    const brands = await getBrand(appSdk, storeId, feedProduct) ? [await getBrand(appSdk, storeId, feedProduct)] : undefined
+    if (brands) {
+      newProductData.brands = brands
     }
 
     const slug = slugify(getFeedValueByKey('title', feedProduct), { strict: true, replacement: '_', lower: true })
@@ -275,20 +281,21 @@ const parseVariations = async (appSdk, appData, auth, storeId, feedVariation, va
   return parsedVariation
 }
 
-const saveEcomProduct = async (appSdk, appData, storeId, feedProduct, variations, isVariation) => {
+const saveEcomProduct = async (appSdk, appData, storeId, feedProduct, variations, isVariation, meta = {}) => {
   try {
     const auth = await appSdk.getAuth(parseInt(storeId, 10))
     const sku = (getFeedValueByKey('sku', feedProduct) || getFeedValueByKey('id', feedProduct)).toString()
-    const { result } = await findEcomProductBySKU(appSdk, storeId, sku)
+    const { result } = await findEcomProductBySKU(appSdk, storeId, sku, meta)
     const product = result.length > 0 ? result[0] : {}
     const { _id } = product
     const resource = _id ? `/products/${_id}.json` : '/products.json'
     const method = _id ? 'PATCH' : 'POST'
     const parsedProduct = await parseProduct(appSdk, appData, auth, storeId, feedProduct, product)
-    console.log(parsedProduct)
     let ecomResponse = {}
 
     if (appData.update_product || method === 'POST') {
+      const ecomRequest = { resource, method, parsedProduct }
+      meta.ecomRequest = ecomRequest
       const { response } = await appSdk.apiRequest(parseInt(storeId), resource, method, parsedProduct)
       ecomResponse = response.data || { _id }
       if (isVariation) {
@@ -300,6 +307,7 @@ const saveEcomProduct = async (appSdk, appData, storeId, feedProduct, variations
     return ecomResponse
   } catch (error) {
     if (error && error.response) {
+      meta.responseError = { data: error.response.data || '', config: error.response.config || '' }
       logger.error({ data: error.response.data })
     }
     throw error

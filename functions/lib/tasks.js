@@ -88,6 +88,7 @@ const handleFeedTableQueue = async (notification) => {
 }
 
 const run = async (snap) => {
+  const meta = { }
   let hasError = false
   const notification = snap.data()
   logger.info('[ecomNotification:start task]', JSON.stringify(notification))
@@ -114,7 +115,7 @@ const run = async (snap) => {
         break
 
       case 'feed_create_product':
-        productId = await saveEcomProduct(appSdk, appData, storeId, product, variations, isVariation)
+        productId = await saveEcomProduct(appSdk, appData, storeId, product, variations, isVariation, meta)
         if (productId && imageLinks.length) {
           addNotification(admin, {
             store_id: storeId,
@@ -145,7 +146,8 @@ const run = async (snap) => {
           hasError: true,
           error: { status: error.response.status, data: error.response.data },
           attempts: parseInt(notification.attempts || 0) + 1,
-          ready_at: admin.firestore.Timestamp.now().toMillis() + 500
+          ready_at: admin.firestore.Timestamp.now().toMillis() + 500,
+          meta
         },
         { merge: true }
       )
@@ -158,7 +160,8 @@ const run = async (snap) => {
         hasError: true,
         error: error.message,
         attempts: parseInt(notification.attempts || 0) + 1,
-        ready_at: admin.firestore.Timestamp.now().toMillis() + 500
+        ready_at: admin.firestore.Timestamp.now().toMillis() + 500,
+        meta
       },
       { merge: true }
     )

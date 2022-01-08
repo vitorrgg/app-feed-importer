@@ -3,10 +3,10 @@ const serviceAccount = require(process.env.GOOGLE_APPLICATION_CREDENTIALS)
 const _ = require('lodash')
 const { auth } = require('firebase-admin')
 const getAppData = require('./../lib/store-api/get-app-data')
-
+const ExcelJS = require('exceljs')
+const path = require('path')
 // const feedProduct = require('./mocks/product-feed.json')
-// const fs = require('fs')
-// const path = require('path')
+const fs = require('fs')
 const axios = require('axios').default
 // const { differenceInMinutes } = require('date-fns')
 
@@ -19,7 +19,8 @@ admin.initializeApp({
 const { setup } = require('@ecomplus/application-sdk')
 const { parseProduct, tryImageUpload, saveEcomProduct, getSpecifications } = require('../lib/gmc-to-ecom')
 const xmlParser = require('fast-xml-parser')
-const { handleFeedTableQueue, run } = require('../lib/tasks')
+const { handleFeedTableQueue, run, handleFeedQueue } = require('../lib/tasks')
+const tableFeed = require('../lib/table-to-ecom')
 // const { handleFeedQueue, handleWorker, run } = require('../lib/tasks')
 
 // const testHandleFeedQueue = async () => {
@@ -99,7 +100,7 @@ const testHandleFeedQueue = async (storeId, feedUrl) => {
   }
 }
 
-testHandleFeedQueue(1117, 'https://apks-pds.s3.amazonaws.com/example_feed_xml_rss.xml')
+// testHandleFeedQueue(1117, 'https://apks-pds.s3.amazonaws.com/example_feed_xml_rss.xml')
 // const testSaveProduct = async () => {
 //   const appSdk = await setup(null, true, admin.firestore())
 //   const notificationRef = await admin.firestore().collection('ecom_notifications').get()
@@ -147,7 +148,7 @@ const importNotification = async () => {
   await setup(null, true, admin.firestore())
   const ref = admin
     .firestore()
-    .collection('ecom_notification_dead_letter_queue')
+    .collection('ecom_notifications')
   const docs = await ref.get()
   let canRun = true
   docs.forEach(async snap => {
@@ -158,4 +159,15 @@ const importNotification = async () => {
   })
 }
 
-importNotification()
+// importNotification()
+
+const parseCsv = async () => {
+  await setup(null, true, admin.firestore())
+  const data = await fs.readFileSync(path.join(__dirname, 'new-feed.csv'))
+  // console.log(data)
+  const parsedCsv = await tableFeed.parseProduct(data, 'text/csv')
+  console.log(parsedCsv)
+  handleFeedQueue(1117, parsedCsv)
+}
+
+parseCsv()
