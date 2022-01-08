@@ -199,9 +199,9 @@ const parseProduct = async (buffer, contentType) => {
       const stream = new Duplex()
       stream.push(buffer)
       stream.push(null)
-      worksheet = await workbook.csv.read(stream, { parserOptions: { delimiter: ';', escape: true } })
+      worksheet = await workbook.csv.read(stream, { parserOptions: { delimiter: ';' } })
     } else {
-      worksheet = await workbook.xlsx.load(buffer, { parserOptions: { delimiter: ';', escape: true } })
+      worksheet = await workbook.xlsx.load(buffer, { parserOptions: { delimiter: ';' } })
     }
     const values = []
     const columns = []
