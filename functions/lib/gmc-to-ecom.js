@@ -206,7 +206,7 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
       quantity: 0, // get on availability
       body_html: getFeedValueByKey('description', feedProduct),
       weight: {
-        value: Number(getFeedValueByKey('shipping_weight', feedProduct).split(' ')[0]),
+        value: Number(getFeedValueByKey('shipping_weight', feedProduct).split(' ')[0].replace(',', '.')),
         unit: getFeedValueByKey('shipping_weight', feedProduct).split(' ')[1]
       },
       pictures: [],

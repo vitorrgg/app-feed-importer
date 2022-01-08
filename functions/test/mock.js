@@ -19,7 +19,7 @@ admin.initializeApp({
 const { setup } = require('@ecomplus/application-sdk')
 const { parseProduct, tryImageUpload, saveEcomProduct, getSpecifications } = require('../lib/gmc-to-ecom')
 const xmlParser = require('fast-xml-parser')
-const { handleFeedTableQueue } = require('../lib/tasks')
+const { handleFeedTableQueue, run } = require('../lib/tasks')
 // const { handleFeedQueue, handleWorker, run } = require('../lib/tasks')
 
 // const testHandleFeedQueue = async () => {
@@ -142,3 +142,20 @@ testHandleFeedQueue(1117, 'https://apks-pds.s3.amazonaws.com/example_feed_xml_rs
 
 // testSize()
 // testChangeLastExcution()
+
+const importNotification = async () => {
+  await setup(null, true, admin.firestore())
+  const ref = admin
+    .firestore()
+    .collection('ecom_notification_dead_letter_queue')
+  const docs = await ref.get()
+  let canRun = true
+  docs.forEach(async snap => {
+    if (canRun) {
+      await run(snap)
+      canRun = false
+    }
+  })
+}
+
+importNotification()
