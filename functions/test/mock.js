@@ -163,10 +163,9 @@ const importNotification = async () => {
 
 const parseCsv = async () => {
   await setup(null, true, admin.firestore())
-  const data = await fs.readFileSync(path.join(__dirname, 'new-feed.csv'))
-  // console.log(data)
+  const data = await fs.readFileSync(path.join(__dirname, 'lojaintegrada.csv'))
   const parsedCsv = await tableFeed.parseProduct(data, 'text/csv')
-  console.log(parsedCsv)
+  console.log(parsedCsv.filter(x => x['g:item_group_id'] === 'ZZHRYMVFM').map(x => ({ id: x['g:id'], item_group_id: x['g:item_group_id'], sku: x['g:sku'] })))
   handleFeedQueue(1117, parsedCsv)
 }
 

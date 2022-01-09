@@ -128,6 +128,7 @@ const getCategory = async (appSdk, storeId, feedProduct) => {
     if (gmcCategory.textContent) {
       const categoryName = gmcCategory.textContent.split('>').reverse()[0].trim()
       const categorySlug = slugify(categoryName, { strict: true, replacement: '_', lower: true })
+      console.log('------------', 'getCategory', categoryName)
       const category = await findCategoryByName(appSdk, storeId, categoryName)
       if (category && Array.isArray(category.result) && category.result.length) {
         const foundCategory = { _id: category.result[0]._id, name: category.result[0].name, slug: category.result[0].slug }
@@ -192,7 +193,7 @@ const tryImageUpload = async (storeId, auth, originImgUrl, product) => {
   }
 }
 
-const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product = {}) => {
+const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product = {}, meta = {}) => {
   try {
     const categories = await getCategory(appSdk, storeId, feedProduct)
     const condition = getFeedValueByKey('condition', feedProduct)
@@ -253,6 +254,13 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
     return product
   } catch (error) {
     logger.error('[PRODUCT-TO-ECOM:parseProduct | ERROR]', error)
+    if (error && error.response) {
+      meta.parseProductError = { data: error.response.data || '', config: error.response.config || '' }
+      logger.error({ data: error.response.data })
+      throw error
+    }
+    meta.parseProductError = { error: error.toString(), stack: error.stack }
+    throw (error)
   }
 }
 
@@ -290,11 +298,11 @@ const saveEcomProduct = async (appSdk, appData, storeId, feedProduct, variations
     const { _id } = product
     const resource = _id ? `/products/${_id}.json` : '/products.json'
     const method = _id ? 'PATCH' : 'POST'
-    const parsedProduct = await parseProduct(appSdk, appData, auth, storeId, feedProduct, product)
+    const parsedProduct = await parseProduct(appSdk, appData, auth, storeId, feedProduct, product, meta)
     let ecomResponse = {}
 
     if (appData.update_product || method === 'POST') {
-      const ecomRequest = { resource, method, parsedProduct }
+      const ecomRequest = { resource, method, parsedProduct: JSON.stringify(parsedProduct || '') }
       meta.ecomRequest = ecomRequest
       const { response } = await appSdk.apiRequest(parseInt(storeId), resource, method, parsedProduct)
       ecomResponse = response.data || { _id }
@@ -310,6 +318,7 @@ const saveEcomProduct = async (appSdk, appData, storeId, feedProduct, variations
       meta.responseError = { data: error.response.data || '', config: error.response.config || '' }
       logger.error({ data: error.response.data })
     }
+    meta.responseError = { error: error.toString() }
     throw error
   }
 }

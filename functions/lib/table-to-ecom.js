@@ -23,7 +23,7 @@ const MAPPED_COLUMNS = [
     tableColumn: 'tipo',
     feedColumn: 'g:item_group_id',
     parser: (row, value) => {
-      if (value === 'variacao') {
+      if (['variacao', 'com-variacao'].includes(value)) {
         const sku = row.getCell('g:sku').text
         if (sku) {
           return sku.split('-')[0]
@@ -85,7 +85,7 @@ const MAPPED_COLUMNS = [
   {
     tableColumn: 'categoria-nome-nivel-1',
     feedColumn: 'g:google_product_category',
-    parser: (row, value, options = {}) => {
+    parser: (row, _, options = {}) => {
       const { worksheet } = options
       const categories = []
       row.eachCell((_, columnNumber) => {
@@ -94,7 +94,7 @@ const MAPPED_COLUMNS = [
           categories.push(row.getCell(key).text)
         }
       })
-      return categories.join('; ')
+      return categories.join('>')
     }
   },
   {

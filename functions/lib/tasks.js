@@ -96,7 +96,11 @@ const run = async (snap) => {
     const appSdk = await setup(null, true, admin.firestore())
     const { resource, store_id: storeId, body, isVariation } = notification
     const appData = await getAppData({ appSdk, storeId, auth })
-    const product = isVariation ? body[0] : body
+    let product = isVariation ? body[0] : body
+    if (!product['g:title'] && isVariation) {
+      product = body.find(feed => feed['g:title'])
+    }
+
     const variations = isVariation ? body : []
 
     let productId
