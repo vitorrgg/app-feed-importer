@@ -7,6 +7,7 @@ const SPECIFICATION_MAP = require('./specifications-map')
 const htmlParser = require('node-html-parser')
 
 const findEcomProductBySKU = async (appSdk, storeId, sku, meta = {}) => {
+  console.log('findEcomProduct', sku)
   const resource = `/products.json?sku=${sku}`
   meta.findEcomProductBySKU = { resource, sku, method: 'GET ' }
   try {
@@ -198,7 +199,7 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
     const categories = await getCategory(appSdk, storeId, feedProduct)
     const condition = getFeedValueByKey('condition', feedProduct)
     const newProductData = {
-      sku: (getFeedValueByKey('id', feedProduct) || getFeedValueByKey('sku', feedProduct)).toString(),
+      sku: (getFeedValueByKey('sku', feedProduct)).toString() || getFeedValueByKey('id', feedProduct),
       name: getFeedValueByKey('title', feedProduct),
       subtitle: getFeedValueByKey('subtitle', feedProduct),
       meta_title: getFeedValueByKey('title', feedProduct),
@@ -308,6 +309,7 @@ const saveEcomProduct = async (appSdk, appData, storeId, feedProduct, variations
       ecomResponse = response.data || { _id }
       if (isVariation) {
         const { result: savedProduct } = await findEcomProductBySKU(appSdk, storeId, sku)
+        console.log('-----------------------savedProduct', savedProduct)
         await saveEcomVariations(appSdk, appData, storeId, variations, savedProduct[0])
       }
     }
@@ -334,6 +336,8 @@ const saveEcomVariations = async (appSdk, appData, storeId, variations, product)
       const parsedVariation = await parseVariations(appSdk, appData, auth, storeId, variation, variationFound)
       parsedVariations.push(parsedVariation)
     }
+
+    console.log('quebra aqui ------', product)
 
     await appSdk.apiRequest(parseInt(storeId), `/products/${product._id}.json`, 'PATCH', { variations: parsedVariations })
   } catch (error) {

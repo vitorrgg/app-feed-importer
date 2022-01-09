@@ -148,18 +148,18 @@ const importNotification = async () => {
   await setup(null, true, admin.firestore())
   const ref = admin
     .firestore()
-    .collection('ecom_notifications')
+    .collection('ecom_notification_dead_letter_queue')
   const docs = await ref.get()
   let canRun = true
   docs.forEach(async snap => {
     if (canRun) {
-      await run(snap)
       canRun = false
+      await run(snap)
     }
   })
 }
 
-// importNotification()
+importNotification()
 
 const parseCsv = async () => {
   await setup(null, true, admin.firestore())
@@ -169,4 +169,4 @@ const parseCsv = async () => {
   handleFeedQueue(1117, parsedCsv)
 }
 
-parseCsv()
+// parseCsv()
