@@ -76,14 +76,6 @@
         "description": "Atualizar cadastro (não apenas estoque) de produtos importados já existentes na plataforma"
       },
       "hide": true
-    },
-    "__token": {
-      "schema": {
-        "type": "string",
-        "title": "App Token",
-        "description": "Token para requisições externas"
-      },
-      "hide": true
     }
   },
   "auth_callback_uri": "https://us-central1-ecom-feed-importer.cloudfunctions.net/app/ecom/auth-callback",
