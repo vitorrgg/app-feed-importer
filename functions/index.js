@@ -17,7 +17,7 @@ const bodyParser = require('body-parser')
 const server = express()
 const router = express.Router()
 const routes = './routes'
-
+const cors = require('cors')
 // enable/disable some E-Com common routes based on configuration
 const { app, procedures } = require('./ecom.config')
 
@@ -27,8 +27,11 @@ const { ecomServerIps, setup } = require('@ecomplus/application-sdk')
 
 server.use(bodyParser.urlencoded({ extended: false }))
 server.use(bodyParser.json())
+server.use(cors({ origin: true }))
 
 server.use((req, res, next) => {
+  res.set('Access-Control-Allow-Origin', '*')
+
   if (req.url.startsWith('/ecom/')) {
     // get E-Com Plus Store ID from request header
     req.storeId = parseInt(req.get('x-store-id') || req.query.store_id, 10)
