@@ -167,14 +167,6 @@ const app = {
       },
       hide: true
     },
-    __token: {
-      schema: {
-        type: 'string',
-        title: 'App Token',
-        description: 'Token para requisições externas'
-      },
-      hide: true
-    }
     /**
      webhook_uri: {
        schema: {

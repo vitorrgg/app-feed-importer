@@ -17,6 +17,7 @@ exports.post = async ({ admin, appSdk }, req, res) => {
 
   const appData = await getAppData({ appSdk, storeId, auth })
 
+  console.log(token, appData)
   if (!token || appData.__token !== token) {
     return res.status(403).send('Unauthorized token')
   }
