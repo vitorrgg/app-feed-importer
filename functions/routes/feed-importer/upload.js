@@ -3,15 +3,24 @@ const path = require('path')
 const os = require('os')
 const busboy = require('busboy')
 const { v4: uuid } = require('uuid')
+const getAppData = require('./../../lib/store-api/get-app-data')
 
 const addNotification = require('../../utils/addNotification')
 
 exports.post = async ({ admin, appSdk }, req, res) => {
   const storeId = req.storeId ? req.storeId : req.query.store_id
-  console.log(req.storeId, req.query)
+  const token = req.query.token
   if (!storeId) {
     return res.status(403).send('storeId is required!')
   }
+  const auth = await appSdk.getAuth(1117)
+
+  const appData = await getAppData({ appSdk, storeId, auth })
+
+  if (!token || appData.__token !== token) {
+    return res.status(403).send('Unauthorized token')
+  }
+
   const bb = busboy({ headers: req.headers })
   const tmpdir = os.tmpdir()
 

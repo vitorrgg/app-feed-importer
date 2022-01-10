@@ -166,6 +166,14 @@ const app = {
         description: 'Atualizar cadastro (não apenas estoque) de produtos importados já existentes na plataforma'
       },
       hide: true
+    },
+    __token: {
+      schema: {
+        type: 'string',
+        title: 'App Token',
+        description: 'Token para requisições externas'
+      },
+      hide: true
     }
     /**
      webhook_uri: {

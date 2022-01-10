@@ -3,6 +3,11 @@ const { procedures } = require('./../../ecom.config')
 // handle Store API errors
 const errorHandling = require('./../../lib/store-api/error-handling')
 
+const CryptJS = require('crypto-js/md5')
+
+const { operatorToken } = require('./../../__env')
+const updateAppData = require('./../../lib/store-api/update-app-data')
+
 exports.post = ({ appSdk }, req, res) => {
   const { storeId } = req
 
@@ -21,7 +26,11 @@ exports.post = ({ appSdk }, req, res) => {
         })
 
          */
-        return true
+        return appSdk.getAuth(storeId, authenticationId).then(auth => {
+          const hash = CryptJS(storeId, operatorToken)
+          updateAppData({ appSdk, storeId, auth }, { hidden_data: { __token: hash.toString() } })
+          return true
+        })
       }
 
       // not new store, just refreshing access token
