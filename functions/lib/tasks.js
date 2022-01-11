@@ -98,7 +98,7 @@ const run = async (snap) => {
     const appData = await getAppData({ appSdk, storeId, auth })
     let product = isVariation ? body[0] : body
     if (!product['g:title'] && isVariation) {
-      product = body.find(feed => feed['g:title'])
+      product = body.find(feed => feed['g:title']) || product
     }
 
     const variations = isVariation ? body : []
