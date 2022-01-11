@@ -7,6 +7,7 @@ const CryptJS = require('crypto-js/md5')
 
 const { operatorToken } = require('./../../__env')
 const updateAppData = require('./../../lib/store-api/update-app-data')
+const { logger } = require('firebase-functions')
 
 exports.post = ({ appSdk }, req, res) => {
   const { storeId } = req
@@ -29,7 +30,10 @@ exports.post = ({ appSdk }, req, res) => {
         return appSdk.getAuth(storeId, authenticationId).then(auth => {
           const hash = CryptJS(storeId, operatorToken)
           updateAppData({ appSdk, storeId, auth }, { hidden_data: { __token: hash.toString() } })
+          logger.log('info', `success to generate token from ${storeId} | token: ${hash.toString()}`)
           return true
+        }).catch(error => {
+          logger.log('error', `error to generate token from ${storeId} | error: ${error.toString()}`)
         })
       }
 
