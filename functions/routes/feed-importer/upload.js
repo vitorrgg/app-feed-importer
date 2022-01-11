@@ -15,7 +15,7 @@ exports.post = async ({ admin, appSdk }, req, res) => {
   }
   const auth = await appSdk.getAuth(1117)
 
-  const appData = await getAppData({ appSdk, storeId, auth })
+  const appData = await getAppData({ appSdk, storeId, auth }, true)
 
   console.log(token, appData)
   if (!token || appData.__token !== token) {

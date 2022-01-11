@@ -27,14 +27,6 @@ exports.post = ({ appSdk }, req, res) => {
         })
 
          */
-        return appSdk.getAuth(storeId, authenticationId).then(auth => {
-          const hash = CryptJS(storeId, operatorToken)
-          updateAppData({ appSdk, storeId, auth }, { __token: hash.toString() }, true)
-          logger.log('info', `success to generate token from ${storeId} | token: ${hash.toString()}`)
-          return true
-        }).catch(error => {
-          logger.log('error', `error to generate token from ${storeId} | error: ${error.toString()}`)
-        })
       }
 
       // not new store, just refreshing access token
@@ -43,7 +35,6 @@ exports.post = ({ appSdk }, req, res) => {
           const { row, docRef } = auth
           if (!row.setted_up) {
             console.log(`Try saving procedures for store #${storeId}`)
-
             /**
              * You may want to be notified when app "self" data is edited:
 
@@ -58,6 +49,11 @@ exports.post = ({ appSdk }, req, res) => {
             // must save procedures once only
             return appSdk.saveProcedures(storeId, procedures, auth)
               .then(() => docRef.set({ setted_up: true }, { merge: true }))
+              .then(() => {
+                const hash = CryptJS(storeId, operatorToken)
+                updateAppData({ appSdk, storeId, auth }, { __token: hash.toString() }, true)
+                logger.log('info', `success to generate token from ${storeId} | token: ${hash.toString()}`)
+              })
               /**
                * You may want additional request to your server with tokens after store setup:
 
