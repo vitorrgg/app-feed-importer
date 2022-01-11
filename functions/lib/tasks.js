@@ -120,7 +120,7 @@ const run = async (snap) => {
 
       case 'feed_create_product':
         productId = await saveEcomProduct(appSdk, appData, storeId, product, variations, isVariation, meta)
-        if (productId && imageLinks.length) {
+        if (productId && productId._id && imageLinks.length) {
           addNotification(admin, {
             store_id: storeId,
             resource: 'feed_import_image',
