@@ -29,7 +29,7 @@ exports.post = ({ appSdk }, req, res) => {
          */
         return appSdk.getAuth(storeId, authenticationId).then(auth => {
           const hash = CryptJS(storeId, operatorToken)
-          updateAppData({ appSdk, storeId, auth }, { hidden_data: { __token: hash.toString() } })
+          updateAppData({ appSdk, storeId, auth }, { __token: hash.toString() }, true)
           logger.log('info', `success to generate token from ${storeId} | token: ${hash.toString()}`)
           return true
         }).catch(error => {
