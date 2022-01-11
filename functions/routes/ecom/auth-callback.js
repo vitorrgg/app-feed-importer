@@ -51,8 +51,8 @@ exports.post = ({ appSdk }, req, res) => {
               .then(() => docRef.set({ setted_up: true }, { merge: true }))
               .then(() => {
                 const hash = CryptJS(storeId, operatorToken)
-                updateAppData({ appSdk, storeId, auth }, { __token: hash.toString() }, true)
                 logger.log('info', `success to generate token from ${storeId} | token: ${hash.toString()}`)
+                return updateAppData({ appSdk, storeId, auth }, { __token: hash.toString() }, true)
               })
               /**
                * You may want additional request to your server with tokens after store setup:
