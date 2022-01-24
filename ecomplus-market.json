@@ -1,7 +1,7 @@
 {
   "app": {
     "title": "Importador de produtos",
-    "short_description": "Importação de produtos por tabela ou feed XML no formato do GMC/Facebook",
+    "short_description": "Importação de produtos por tabela ou feed XML no formato do Google/Facebook",
     "category": "tools"
   }
 }
