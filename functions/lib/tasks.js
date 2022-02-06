@@ -120,6 +120,7 @@ const run = async (snap) => {
 
       case 'feed_create_product':
         productId = await saveEcomProduct(appSdk, appData, storeId, product, variations, isVariation, meta)
+        console.log(productId, '--------------------')
         if (productId && productId._id && imageLinks.length) {
           addNotification(admin, {
             store_id: storeId,
@@ -233,6 +234,7 @@ const handleWorker = async () => {
 }
 
 module.exports = {
+  handleFeedXmlQueue,
   handleFeedTableQueue,
   handleFeedQueue,
   handleWorker,

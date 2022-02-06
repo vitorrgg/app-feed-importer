@@ -17,17 +17,29 @@ admin.initializeApp({
 // // const { handleFeedQueue } = require('../lib/tasks')
 
 const { setup } = require('@ecomplus/application-sdk')
-const { parseProduct, tryImageUpload, saveEcomProduct, getSpecifications } = require('../lib/gmc-to-ecom')
+const {
+  parseProduct,
+  tryImageUpload,
+  saveEcomProduct,
+  getSpecifications
+} = require('../lib/gmc-to-ecom')
 const xmlParser = require('fast-xml-parser')
-const { handleFeedTableQueue, run, handleFeedQueue } = require('../lib/tasks')
+const {
+  handleFeedTableQueue,
+  run,
+  handleFeedQueue,
+  handleFeedXmlQueue
+} = require('../lib/tasks')
 const tableFeed = require('../lib/table-to-ecom')
 // const { handleFeedQueue, handleWorker, run } = require('../lib/tasks')
 
-// const testHandleFeedQueue = async () => {
-//   setup(null, true, admin.firestore())
-//   const feedUrl = 'https://apks-pds.s3.amazonaws.com/example_feed_xml_rss.xml'
-//   await handleFeedQueue(1117, feedUrl)
-// }
+const testHandleXMLFeedQueue = async () => {
+  setup(null, true, admin.firestore())
+  const feedUrl = 'https://lojacontrotec.com.br/?woocommerce_gpf=google'
+  await handleFeedXmlQueue(1117, feedUrl)
+}
+
+// testHandleXMLFeedQueue()
 
 // const testCreateQueueController = async () => {
 //   await setup(null, true, admin.firestore())
@@ -53,7 +65,7 @@ const tableFeed = require('../lib/table-to-ecom')
 
 // testRun()
 
-const getFeedItems = (feedData) => {
+const getFeedItems = feedData => {
   const hasRssProperty = Object.prototype.hasOwnProperty.call(feedData, 'rss')
 
   if (feedData && hasRssProperty) {
@@ -62,7 +74,7 @@ const getFeedItems = (feedData) => {
   return feedData && feedData.feed && feedData.feed.entry
 }
 
-const getFeed = async (feedUrl) => {
+const getFeed = async feedUrl => {
   return axios.get(feedUrl)
 }
 
@@ -72,7 +84,9 @@ const testHandleFeedQueue = async (storeId, feedUrl) => {
     const { data: feedData } = await getFeed(feedUrl)
     const parsedFeed = xmlParser.parse(feedData)
     const products = getFeedItems(parsedFeed)
-    const groupedProducts = _.groupBy(products, (item) => _.get(item, 'g:item_group_id', 'without_variations'))
+    const groupedProducts = _.groupBy(products, item =>
+      _.get(item, 'g:item_group_id', 'without_variations')
+    )
 
     const { without_variations: withoutVariations } = groupedProducts
     delete groupedProducts.without_variations
@@ -161,12 +175,37 @@ const testHandleFeedQueue = async (storeId, feedUrl) => {
 
 // importNotification()
 
-const parseCsv = async () => {
-  await setup(null, true, admin.firestore())
-  const data = await fs.readFileSync(path.join(__dirname, 'lojaintegrada.csv'))
-  const parsedCsv = await tableFeed.parseProduct(data, 'text/csv')
-  console.log(parsedCsv.filter(x => x['g:item_group_id'] === 'ZZHRYMVFM').map(x => ({ id: x['g:id'], item_group_id: x['g:item_group_id'], sku: x['g:sku'] })))
-  handleFeedQueue(1117, parsedCsv)
+// const parseCsv = async () => {
+//   await setup(null, true, admin.firestore())
+//   const data = await fs.readFileSync(path.join(__dirname, 'lojaintegrada.csv'))
+//   const parsedCsv = await tableFeed.parseProduct(data, 'text/csv')
+//   console.log(parsedCsv.filter(x => x['g:item_group_id'] === 'ZZHRYMVFM').map(x => ({ id: x['g:id'], item_group_id: x['g:item_group_id'], sku: x['g:sku'] })))
+//   handleFeedQueue(1117, parsedCsv)
+// }
+
+// parseCsv()
+
+const parseWoocommerce = async () => {
+  setup(null, true, admin.firestore())
+  const feedUrl = 'https://lojacontrotec.com.br/?woocommerce_gpf=google'
+  const { data: feedData } = await getFeed(feedUrl)
+  const parsedFeed = xmlParser.parse(feedData)
+  const products = getFeedItems(parsedFeed)
+  const snap = {
+    data () {
+      return {
+        resource: 'feed_create_product',
+        store_id: 1117,
+        body: products[0],
+        isVariation: false
+      }
+    },
+    delete () {
+      console.log('deletou...')
+    }
+  }
+  await run(snap)
+  console.log(products)
 }
 
-parseCsv()
+parseWoocommerce()

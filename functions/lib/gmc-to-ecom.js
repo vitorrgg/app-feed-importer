@@ -23,7 +23,7 @@ const findEcomProductBySKU = async (appSdk, storeId, sku, meta = {}) => {
 }
 
 const getFeedValueByKey = (key, data) => {
-  return data[`g:${key}`] || data[key] || ''
+  return data[`g:${key}`] || data[key] || data[key.toUpperCase()] || data[`g:${key.toUpperCase()}`] || ''
 }
 
 const getSpecifications = (feedProduct) => {
