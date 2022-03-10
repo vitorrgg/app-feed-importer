@@ -12,6 +12,7 @@ const findEcomProductBySKU = async (appSdk, storeId, sku, meta = {}) => {
   meta.findEcomProductBySKU = { resource, sku, method: 'GET ' }
   try {
     const { response: { data } } = await appSdk.apiRequest(parseInt(storeId), resource, 'GET')
+    logger.log(`Find Product ${storeId}`, data)
     return data
   } catch (error) {
     if (error && error.response) {
