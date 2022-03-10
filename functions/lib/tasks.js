@@ -235,7 +235,7 @@ const handleWorker = async () => {
     queueControllerRef.doc(queueController.id)
       .set({ running: false, last_excution: admin.firestore.Timestamp.now() })
   } catch (error) {
-    console.log(error)
+    console.error(error)
     queueControllerRef.doc(queueController.id)
       .set({ running: false, last_excution: admin.firestore.Timestamp.now() })
   } finally {
