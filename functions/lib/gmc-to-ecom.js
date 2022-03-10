@@ -15,6 +15,7 @@ const findEcomProductBySKU = async (appSdk, storeId, sku, meta = {}) => {
     logger.log(`Find Product ${storeId}`, data)
     return data
   } catch (error) {
+    logger.log(`Error at ${storeId} for findEcomProduct before error response`, error)
     if (error && error.response) {
       console.log(`Error at ${storeId} for findEcomProduct`)
       meta.findEcomProductBySKU = { resource, sku, method: 'GET ', data: { error: error.response.data, config: error.response.config } }
