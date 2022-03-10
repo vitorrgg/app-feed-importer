@@ -119,7 +119,6 @@ const run = async (snap, data = null) => {
         break
 
       case 'feed_create_product':
-        console.log(`Create Product at ${storeId}`, product)
         productId = await saveEcomProduct(appSdk, appData, storeId, product, variations, isVariation, meta)
         console.log(productId, '--------------------')
         if (productId && productId._id && imageLinks.length) {
