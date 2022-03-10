@@ -295,11 +295,13 @@ const saveEcomProduct = async (appSdk, appData, storeId, feedProduct, variations
     const auth = await appSdk.getAuth(parseInt(storeId, 10))
     const sku = (getFeedValueByKey('sku', feedProduct) || getFeedValueByKey('id', feedProduct)).toString()
     const { result } = await findEcomProductBySKU(appSdk, storeId, sku, meta)
+    console.log(result)
     const product = result.length > 0 ? result[0] : {}
     const { _id } = product
     const resource = _id ? `/products/${_id}.json` : '/products.json'
     const method = _id ? 'PATCH' : 'POST'
     const parsedProduct = await parseProduct(appSdk, appData, auth, storeId, feedProduct, product, meta)
+    console.log(parsedProduct)
     let ecomResponse = {}
 
     if (appData.update_product || method === 'POST') {
