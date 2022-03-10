@@ -12,7 +12,7 @@ const findEcomProductBySKU = async (appSdk, storeId, sku, meta = {}) => {
   meta.findEcomProductBySKU = { resource, sku, method: 'GET ' }
   try {
     const { response: { data } } = await appSdk.apiRequest(parseInt(storeId), resource, 'GET')
-    logger.log(`Find Product ${storeId}`, data)
+    logger.log(`Find Product ${storeId}`,await appSdk.apiRequest(parseInt(storeId), resource, 'GET'))
     return data
   } catch (error) {
     logger.log(`Error at ${storeId} for findEcomProduct before error response`, error)
@@ -294,17 +294,19 @@ const parseVariations = async (appSdk, appData, auth, storeId, feedVariation, va
 }
 
 const saveEcomProduct = async (appSdk, appData, storeId, feedProduct, variations, isVariation, meta = {}) => {
-  console.log(`#${storeId} before try`)
   try {
     const auth = await appSdk.getAuth(parseInt(storeId, 10))
     logger.log(`Auth ${storeId}`, auth)
     const sku = (getFeedValueByKey('sku', feedProduct) || getFeedValueByKey('id', feedProduct)).toString()
+    console.log(`#${storeId} before findEcom`, appSdk, meta)
     const { result } = await findEcomProductBySKU(appSdk, storeId, sku, meta)
     logger.log(`Find Product on API - ${storeId}`, result)
     const product = result.length > 0 ? result[0] : {}
     const { _id } = product
     const resource = _id ? `/products/${_id}.json` : '/products.json'
+    // const resource = '/products.json'
     const method = _id ? 'PATCH' : 'POST'
+    // const method = 'POST'
     const parsedProduct = await parseProduct(appSdk, appData, auth, storeId, feedProduct, product, meta)
     logger.log(`Parsed Product ${storeId}`, parsedProduct)
     let ecomResponse = {}
