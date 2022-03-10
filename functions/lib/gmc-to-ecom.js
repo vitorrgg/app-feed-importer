@@ -11,13 +11,10 @@ const findEcomProductBySKU = async (appSdk, storeId, sku, meta = {}) => {
   const resource = `/products.json?sku=${sku}`
   meta.findEcomProductBySKU = { resource, sku, method: 'GET ' }
   try {
-    logger.log(`Find Product ${storeId}`, await appSdk.apiRequest(parseInt(storeId), resource, 'GET'))
     const { response: { data } } = await appSdk.apiRequest(parseInt(storeId), resource, 'GET')
     return data
   } catch (error) {
-    logger.log(`Error at ${storeId} for findEcomProduct before error response`, error)
     if (error && error.response) {
-      console.log(`Error at ${storeId} for findEcomProduct`)
       meta.findEcomProductBySKU = { resource, sku, method: 'GET ', data: { error: error.response.data, config: error.response.config } }
       logger.error({ data: error.response.data })
     }
@@ -296,21 +293,19 @@ const parseVariations = async (appSdk, appData, auth, storeId, feedVariation, va
 const saveEcomProduct = async (appSdk, appData, storeId, feedProduct, variations, isVariation, meta = {}) => {
   try {
     const auth = await appSdk.getAuth(parseInt(storeId, 10))
-    logger.log(`Auth ${storeId}`, auth)
     const sku = (getFeedValueByKey('sku', feedProduct) || getFeedValueByKey('id', feedProduct)).toString()
     const { result } = await findEcomProductBySKU(appSdk, storeId, sku, meta)
-    logger.log(`Find Product on API - ${storeId}`, result)
     const product = result.length > 0 ? result[0] : {}
     const { _id } = product
-    const resource = _id ? `/products/${_id}.json` : '/products.json'
-    // const resource = '/products.json'
-    const method = _id ? 'PATCH' : 'POST'
-    // const method = 'POST'
+    // const resource = _id ? `/products/${_id}.json` : '/products.json'
+    const resource = '/products.json'
+    // const method = _id ? 'PATCH' : 'POST'
+    const method = 'POST'
     const parsedProduct = await parseProduct(appSdk, appData, auth, storeId, feedProduct, product, meta)
     logger.log(`Parsed Product ${storeId}`, parsedProduct)
     let ecomResponse = {}
 
-    if (appData.update_product || method === 'POST') {
+    if (method === 'POST') {
       const ecomRequest = { resource, method, parsedProduct: JSON.stringify(parsedProduct || '') }
       meta.ecomRequest = ecomRequest
       const { response } = await appSdk.apiRequest(parseInt(storeId), resource, method, parsedProduct)
