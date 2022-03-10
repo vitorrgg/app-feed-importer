@@ -87,10 +87,10 @@ const handleFeedTableQueue = async (notification) => {
   }
 }
 
-const run = async (snap) => {
+const run = async (snap, data = null) => {
   const meta = { }
   let hasError = false
-  const notification = snap.data()
+  const notification = data || snap.data()
   logger.info('[ecomNotification:start task]', JSON.stringify(notification))
   try {
     const appSdk = await setup(null, true, admin.firestore())
@@ -198,27 +198,42 @@ const handleWorker = async () => {
   const queueController = queueControllerSnap.docs[0]
 
   try {
-    console.log('queueController', queueController.data())
-    if (!queueController.data().running) {
-      queueControllerRef.doc(queueController.id).set({ running: true }, { merge: true })
-      const notificationRef = admin.firestore().collection('ecom_notifications')
-      const query = notificationRef
-        .where('ready_at', '<=', admin.firestore.Timestamp.now().toMillis())
-        .orderBy('ready_at')
-        .limit(20)
-
-      const notificationDocs = await query.get()
-      console.log('notification docs', notificationDocs.empty)
-      if (!notificationDocs.empty) {
-        const docsToRun = []
-        notificationDocs.forEach(doc => {
-          docsToRun.push(run(doc))
-        })
-        await Promise.allSettled(docsToRun)
+    // console.log('queueController', queueController.data())
+    const notificationRef = admin.firestore().collection('ecom_notifications')
+    const query = notificationRef.where('ready_at', '<=', admin.firestore.Timestamp.now().toMillis())
+    const queueState = queueController.data()
+    if (queueState.running) {
+      if (!queueState.storeIds || !queueState.storeIds.length) {
+        return
       }
-      queueControllerRef.doc(queueController.id)
-        .set({ running: false, last_excution: admin.firestore.Timestamp.now() })
+      query.where('store_id', 'not-in', queueState.storeIds)
     }
+    query.orderBy('ready_at').limit(20)
+
+    const notificationDocs = await query.get()
+    // console.log('notification docs', notificationDocs.empty)
+    if (!notificationDocs.empty) {
+      const storeIds = []
+      const docsToRun = []
+      notificationDocs.forEach(doc => {
+        const data = doc.data()
+        if (!storeIds.includes(data.store_id)) {
+          if (storeIds.length >= 10) {
+            // https://firebase.google.com/docs/firestore/query-data/queries#limitations_2
+            return
+          }
+          storeIds.push(data.store_id)
+        }
+        docsToRun.push(run(doc, data))
+      })
+      queueControllerRef.doc(queueController.id).set({
+        running: true,
+        store_ids: storeIds
+      }, { merge: true })
+      await Promise.allSettled(docsToRun)
+    }
+    queueControllerRef.doc(queueController.id)
+      .set({ running: false, last_excution: admin.firestore.Timestamp.now() })
   } catch (error) {
     console.log(error)
     queueControllerRef.doc(queueController.id)
