@@ -196,8 +196,7 @@ const tryImageUpload = async (storeId, auth, originImgUrl, product) => {
 
 const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product = {}, meta = {}) => {
   try {
-    console.log(`#${storeId} start on parse product`)
-    //const categories = await getCategory(appSdk, storeId, feedProduct)
+    const categories = await getCategory(appSdk, storeId, feedProduct)
     const condition = getFeedValueByKey('condition', feedProduct)
     const newProductData = {
       sku: (getFeedValueByKey('sku', feedProduct) || getFeedValueByKey('id', feedProduct) || getFeedValueByKey('ID', feedProduct)).toString(),
@@ -216,10 +215,9 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
       },
       pictures: [],
       variations: [],
-      categories: [],
+      categories: categories ? [categories] : [],
       specifications: getSpecifications(feedProduct)
     }
-    logger.log(`First iteration product`, newProductData)
 
     const brands = await getBrand(appSdk, storeId, feedProduct) ? [await getBrand(appSdk, storeId, feedProduct)] : undefined
     if (brands) {
@@ -299,19 +297,15 @@ const saveEcomProduct = async (appSdk, appData, storeId, feedProduct, variations
     const { result } = await findEcomProductBySKU(appSdk, storeId, sku, meta)
     const product = result.length > 0 ? result[0] : {}
     const { _id } = product
-    // const resource = _id ? `/products/${_id}.json` : '/products.json'
-    const resource = '/products.json'
-    // const method = _id ? 'PATCH' : 'POST'
-    const method = 'POST'
+    const resource = _id ? `/products/${_id}.json` : '/products.json'
+    const method = _id ? 'PATCH' : 'POST'
     const parsedProduct = await parseProduct(appSdk, appData, auth, storeId, feedProduct, product, meta)
-    logger.log(`Parsed Product ${storeId}`, parsedProduct)
     let ecomResponse = {}
 
-    if (method === 'POST') {
+    if (appData.update_product || method === 'POST') {
       const ecomRequest = { resource, method, parsedProduct: JSON.stringify(parsedProduct || '') }
       meta.ecomRequest = ecomRequest
       const { response } = await appSdk.apiRequest(parseInt(storeId), resource, method, parsedProduct)
-      logger.log(`Return from API Request ${storeId}`, response)
       ecomResponse = response.data || { _id }
       if (isVariation) {
         const { result: savedProduct } = await findEcomProductBySKU(appSdk, storeId, sku)
