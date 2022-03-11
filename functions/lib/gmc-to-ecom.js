@@ -196,7 +196,8 @@ const tryImageUpload = async (storeId, auth, originImgUrl, product) => {
 
 const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product = {}, meta = {}) => {
   try {
-    const categories = await getCategory(appSdk, storeId, feedProduct)
+    console.log(`#${storeId} start on parse product`)
+    //const categories = await getCategory(appSdk, storeId, feedProduct)
     const condition = getFeedValueByKey('condition', feedProduct)
     const newProductData = {
       sku: (getFeedValueByKey('sku', feedProduct) || getFeedValueByKey('id', feedProduct) || getFeedValueByKey('ID', feedProduct)).toString(),
@@ -215,9 +216,10 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
       },
       pictures: [],
       variations: [],
-      categories: categories ? [categories] : [],
+      categories: [],
       specifications: getSpecifications(feedProduct)
     }
+    logger.log(`First iteration product`, newProductData)
 
     const brands = await getBrand(appSdk, storeId, feedProduct) ? [await getBrand(appSdk, storeId, feedProduct)] : undefined
     if (brands) {
