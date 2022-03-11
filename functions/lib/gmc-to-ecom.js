@@ -11,8 +11,9 @@ const findEcomProductBySKU = async (appSdk, storeId, sku, meta = {}) => {
   const resource = `/products.json?sku=${sku}`
   meta.findEcomProductBySKU = { resource, sku, method: 'GET ' }
   try {
-    const { response: { data } } = await appSdk.apiRequest(parseInt(storeId), resource, 'GET')
-    return data
+    const { response } = await appSdk.apiRequest(parseInt(storeId), resource, 'GET')
+    console.log(response)
+    return response.data
   } catch (error) {
     if (error && error.response) {
       meta.findEcomProductBySKU = { resource, sku, method: 'GET ', data: { error: error.response.data, config: error.response.config } }
