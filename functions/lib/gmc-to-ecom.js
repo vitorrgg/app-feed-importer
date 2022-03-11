@@ -81,9 +81,9 @@ const findBrandBySlug = async (appSdk, storeId, slug) => {
     err.request = err.request?.config
     err.response = err.response?.data
     logger.error(err)
-    if (error && error.response) {
+    /* if (error && error.response) {
       logger.error({ data: error.response.data })
-    }
+    } */
     throw error
   }
 }
@@ -114,9 +114,9 @@ const getBrand = async (appSdk, storeId, feedProduct) => {
     err.request = err.request?.config
     err.response = err.response?.data
     logger.error(err)
-    if (error && error.response) {
+    /* if (error && error.response) {
       logger.error({ data: error.response.data })
-    }
+    } */
     throw error
   }
 }
@@ -342,11 +342,15 @@ const saveEcomProduct = async (appSdk, appData, storeId, feedProduct, variations
 
     return ecomResponse
   } catch (error) {
-    if (error && error.response) {
+    const err = new Error(error.message)
+    err.request = err.request?.config
+    err.response = err.response?.data
+    logger.error(err)
+    /* if (error && error.response) {
       meta.responseError = { data: error.response.data || '', config: error.response.config || '' }
       logger.error({ data: error.response.data })
     }
-    meta.responseError = { error: error.toString() }
+    meta.responseError = { error: error.toString() } */
     throw error
   }
 }
@@ -367,9 +371,13 @@ const saveEcomVariations = async (appSdk, appData, storeId, variations, product)
 
     await appSdk.apiRequest(parseInt(storeId), `/products/${product._id}.json`, 'PATCH', { variations: parsedVariations })
   } catch (error) {
-    if (error && error.response) {
+    const err = new Error(error.message)
+    err.request = err.request?.config
+    err.response = err.response?.data
+    logger.error(err)
+    /* if (error && error.response) {
       logger.error({ data: error.response.data })
-    }
+    } */
     throw error
   }
 }
@@ -394,9 +402,13 @@ const saveEcomImages = async (appSdk, storeId, productId, imageLinks) => {
     }
     await appSdk.apiRequest(parseInt(storeId), resource, 'PATCH', { pictures })
   } catch (error) {
-    if (error && error.response) {
+    const err = new Error(error.message)
+    err.request = err.request?.config
+    err.response = err.response?.data
+    logger.error(err)
+    /* if (error && error.response) {
       logger.error({ data: error.response.data })
-    }
+    } */
     throw error
   }
 }
