@@ -119,9 +119,8 @@ const run = async (snap, data = null) => {
         break
 
       case 'feed_create_product':
-        logger.log(`#${storeId} feed_create_product`, appSdk, appData, storeId, product, variations, isVariation, meta)
         productId = await saveEcomProduct(appSdk, appData, storeId, product, variations, isVariation, meta)
-        logger.log(productId, '-------------------- 1-deu bom')
+        logger.log(productId, '--------------------')
         if (productId && productId._id && imageLinks.length) {
           console.log('Importar imagem')
           addNotification(admin, {
