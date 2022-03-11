@@ -120,19 +120,21 @@ const run = async (snap, data = null) => {
 
       case 'feed_create_product':
         console.log(`#${storeId} feed_create_product`)
-        productId = await saveEcomProduct(appSdk, appData, storeId, product, variations, isVariation, meta)
-        logger.log(productId, '-------------------- 1-deu bom')
-        if (productId && productId._id && imageLinks.length) {
-          console.log('Importar imagem')
-          addNotification(admin, {
-            store_id: storeId,
-            resource: 'feed_import_image',
-            body: {
-              product_id: productId._id,
-              imageLinks
-            }
-          })
-        }
+        setTimeout(() => {
+          productId = await saveEcomProduct(appSdk, appData, storeId, product, variations, isVariation, meta)
+          logger.log(productId, '-------------------- 1-deu bom')
+          if (productId && productId._id && imageLinks.length) {
+            console.log('Importar imagem')
+            addNotification(admin, {
+              store_id: storeId,
+              resource: 'feed_import_image',
+              body: {
+                product_id: productId._id,
+                imageLinks
+              }
+            })
+          }
+        }, 1000)
         break
       case 'feed_import_image':
         await saveEcomImages(appSdk, storeId, body.product_id, body.imageLinks)
