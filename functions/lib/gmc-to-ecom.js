@@ -11,9 +11,9 @@ const findEcomProductBySKU = async (appSdk, storeId, sku, meta = {}) => {
   const resource = `/products.json?sku=${sku}`
   meta.findEcomProductBySKU = { resource, sku, method: 'GET ' }
   try {
-    const { response } = await appSdk.apiRequest(parseInt(storeId), resource, 'GET')
-    console.log(response)
-    return response.data
+    const { response: { data } } = await appSdk.apiRequest(parseInt(storeId), resource, 'GET')
+    logger.log(`#${storeId} without await`, appSdk.apiRequest(parseInt(storeId), resource, 'GET'))
+    return data
   } catch (error) {
     if (error && error.response) {
       meta.findEcomProductBySKU = { resource, sku, method: 'GET ', data: { error: error.response.data, config: error.response.config } }
@@ -294,7 +294,9 @@ const parseVariations = async (appSdk, appData, auth, storeId, feedVariation, va
 const saveEcomProduct = async (appSdk, appData, storeId, feedProduct, variations, isVariation, meta = {}) => {
   try {
     const auth = await appSdk.getAuth(parseInt(storeId, 10))
+    logger.log(`#${storeId}`, auth)
     const sku = (getFeedValueByKey('sku', feedProduct) || getFeedValueByKey('id', feedProduct)).toString()
+    logger.log(`#${storeId}`, sku)
     const { result } = await findEcomProductBySKU(appSdk, storeId, sku, meta)
     const product = result.length > 0 ? result[0] : {}
     const { _id } = product
