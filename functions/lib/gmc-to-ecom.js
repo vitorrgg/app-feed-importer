@@ -6,6 +6,16 @@ const FormData = require('form-data')
 const SPECIFICATION_MAP = require('./specifications-map')
 const htmlParser = require('node-html-parser')
 
+const debugAxiosError = error => {
+  const err = new Error(error.message)
+  if (error.response) {
+    err.status = error.response.status
+    err.response = error.response.data
+  }
+  err.request = error.config
+  logger.error(err)
+}
+
 const findEcomProductBySKU = async (appSdk, storeId, sku, meta = {}) => {
   console.log('findEcomProduct', sku)
   const resource = `/products.json?sku=${sku}`
@@ -14,15 +24,7 @@ const findEcomProductBySKU = async (appSdk, storeId, sku, meta = {}) => {
     const { response: { data } } = await appSdk.apiRequest(parseInt(storeId), resource, 'GET')
     return data
   } catch (error) {
-    const err = new Error(error.message)
-    err.request = err.request?.config
-    err.response = err.response?.data
-    logger.error(err)
-    if (error && error.response) {
-      meta.findEcomProductBySKU = { resource, sku, method: 'GET ', data: { error: error.response.data, config: error.response.config } }
-      logger.error({ data: error.response.data })
-      logger.info({ data: error.response.data })
-    }
+    debugAxiosError(error)
     throw error
   }
 }
@@ -77,13 +79,7 @@ const findBrandBySlug = async (appSdk, storeId, slug) => {
     const { response: { data } } = await appSdk.apiRequest(parseInt(storeId), resource, 'GET')
     return data
   } catch (error) {
-    const err = new Error(error.message)
-    err.request = err.request?.config
-    err.response = err.response?.data
-    logger.error(err)
-    /* if (error && error.response) {
-      logger.error({ data: error.response.data })
-    } */
+    debugAxiosError(error)
     throw error
   }
 }
@@ -110,13 +106,7 @@ const getBrand = async (appSdk, storeId, feedProduct) => {
     await appSdk.apiRequest(parseInt(storeId), '/brands.json', 'POST', newBrand)
     return await getBrand(appSdk, storeId, feedProduct)
   } catch (error) {
-    const err = new Error(error.message)
-    err.request = err.request?.config
-    err.response = err.response?.data
-    logger.error(err)
-    /* if (error && error.response) {
-      logger.error({ data: error.response.data })
-    } */
+    debugAxiosError(error)
     throw error
   }
 }
@@ -129,13 +119,7 @@ const findCategoryByName = async (appSdk, storeId, categoryName) => {
       return data
     }
   } catch (error) {
-    const err = new Error(error.message)
-    err.request = err.request?.config
-    err.response = err.response?.data
-    logger.error(err)
-    /* if (error && error.response) {
-      logger.error({ data: error.response.data })
-    } */
+    debugAxiosError(error)
     throw error
   }
 }
@@ -161,13 +145,7 @@ const getCategory = async (appSdk, storeId, feedProduct) => {
       return await getCategory(appSdk, storeId, feedProduct)
     }
   } catch (error) {
-    const err = new Error(error.message)
-    err.request = err.request?.config
-    err.response = err.response?.data
-    logger.error(err)
-    /* if (error && error.response) {
-      logger.error({ data: error.response.data })
-    } */
+    debugAxiosError(error)
     throw error
   }
 }
@@ -211,11 +189,8 @@ const tryImageUpload = async (storeId, auth, originImgUrl, product) => {
       throw err
     }
   } catch (error) {
-    const err = new Error(error.message)
-    err.request = err.request?.config
-    err.response = err.response?.data
-    logger.error(err)
-    //logger.error('[PRODUCT-TO-ECOM:tryImageUpload | ERROR]', error)
+    delete error.config?.data
+    debugAxiosError(error)
   }
 }
 
@@ -342,15 +317,7 @@ const saveEcomProduct = async (appSdk, appData, storeId, feedProduct, variations
 
     return ecomResponse
   } catch (error) {
-    const err = new Error(error.message)
-    err.request = err.request?.config
-    err.response = err.response?.data
-    logger.error(err)
-    /* if (error && error.response) {
-      meta.responseError = { data: error.response.data || '', config: error.response.config || '' }
-      logger.error({ data: error.response.data })
-    }
-    meta.responseError = { error: error.toString() } */
+    debugAxiosError(error)
     throw error
   }
 }
@@ -371,13 +338,7 @@ const saveEcomVariations = async (appSdk, appData, storeId, variations, product)
 
     await appSdk.apiRequest(parseInt(storeId), `/products/${product._id}.json`, 'PATCH', { variations: parsedVariations })
   } catch (error) {
-    const err = new Error(error.message)
-    err.request = err.request?.config
-    err.response = err.response?.data
-    logger.error(err)
-    /* if (error && error.response) {
-      logger.error({ data: error.response.data })
-    } */
+    debugAxiosError(error)
     throw error
   }
 }
@@ -402,13 +363,7 @@ const saveEcomImages = async (appSdk, storeId, productId, imageLinks) => {
     }
     await appSdk.apiRequest(parseInt(storeId), resource, 'PATCH', { pictures })
   } catch (error) {
-    const err = new Error(error.message)
-    err.request = err.request?.config
-    err.response = err.response?.data
-    logger.error(err)
-    /* if (error && error.response) {
-      logger.error({ data: error.response.data })
-    } */
+    debugAxiosError(error)
     throw error
   }
 }
