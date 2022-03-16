@@ -188,15 +188,14 @@ const run = async (snap, data = null) => {
 const handleWorker = async () => {
   const queueControllerRef = admin.firestore().collection('queue_controller')
 
-  const queueDoc = await queueControllerRef.get()
-  if (queueDoc.empty) {
+  let queueControllerSnap = await queueControllerRef.get()
+  if (queueControllerSnap.empty) {
     await queueControllerRef.add({
       running: false
     })
+    queueControllerSnap = await queueControllerRef.get()
   }
-
-  const queueControllerSnap = await queueControllerRef.get()
-  const queueController = queueControllerSnap.docs[0]
+  let queueController = queueControllerSnap.docs[0]
 
   try {
     // console.log('queueController', queueController.data())
@@ -204,17 +203,17 @@ const handleWorker = async () => {
     const query = notificationRef.where('ready_at', '<=', admin.firestore.Timestamp.now().toMillis())
     const queueState = queueController.data()
     if (queueState.running) {
-      if (!queueState.storeIds || !queueState.storeIds.length) {
+      if (!queueState.store_ids || !queueState.store_ids.length) {
         return
       }
-      query.where('store_id', 'not-in', queueState.storeIds)
+      query.where('store_id', 'not-in', queueState.store_ids)
     }
     query.orderBy('ready_at').limit(20)
 
     const notificationDocs = await query.get()
     // console.log('notification docs', notificationDocs.empty)
+    const storeIds = []
     if (!notificationDocs.empty) {
-      const storeIds = []
       const docsToRun = []
       notificationDocs.forEach(doc => {
         const data = doc.data()
@@ -233,12 +232,25 @@ const handleWorker = async () => {
       }, { merge: true })
       await Promise.allSettled(docsToRun)
     }
-    queueControllerRef.doc(queueController.id)
-      .set({ running: false, last_excution: admin.firestore.Timestamp.now() })
+
+    queueControllerSnap = await queueControllerRef.get()
+    queueController = queueControllerSnap.docs[0]
+    const newQueueState = queueController.data()
+    if (newQueueState.store_ids) {
+      storeIds.forEach(storeId => {
+        const index = newQueueState.store_ids.indexOf(storeId)
+        if (index > -1) {
+          newQueueState.store_ids.splice(index, 1)
+        }
+      })
+      newQueueState.running = Boolean(newQueueState.store_ids.length)
+    } else {
+      newQueueState.running = false
+    }
+    newQueueState.last_excution = admin.firestore.Timestamp.now()
+    queueControllerRef.doc(queueController.id).set(newQueueState)
   } catch (error) {
-    console.error(error)
-    queueControllerRef.doc(queueController.id)
-      .set({ running: false, last_excution: admin.firestore.Timestamp.now() })
+    logger.error(error)
   } finally {
     const lastExcution = queueController.data().last_excution
     if (differenceInMinutes(admin.firestore.Timestamp.now().toDate(), lastExcution.toDate()) > 9) {
