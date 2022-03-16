@@ -214,7 +214,7 @@ const handleWorker = async () => {
     if (!notificationDocs.empty) {
       const docsToRun = []
       notificationDocs.forEach(doc => {
-        if (docsToRun.length < 20) {
+        if (docsToRun.length < 40) {
           const data = doc.data()
           if (!queueState.store_ids.includes(data.store_id)) {
             if (!storeIds.includes(data.store_id)) {
