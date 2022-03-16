@@ -149,7 +149,7 @@ console.log(`-- Sheduled update E-Com Plus tokens '${cron}'`)
 
 exports.worker = functions
   .runWith({
-    timeoutSeconds: 118,
+    timeoutSeconds: 538,
     memory: '256MB'
   })
   .pubsub.schedule('*/2 * * * *').onRun(() => {
