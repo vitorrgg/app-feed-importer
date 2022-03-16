@@ -152,7 +152,7 @@ exports.worker = functions
     timeoutSeconds: 538,
     memory: '512MB'
   })
-  .pubsub.schedule('*/3 * * * *').onRun(() => {
+  .pubsub.schedule('*/2 * * * *').onRun(() => {
     return prepareAppSdk().then(appSdk => {
       return handleWorker()
     })
