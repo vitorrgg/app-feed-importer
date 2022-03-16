@@ -200,15 +200,13 @@ const handleWorker = async () => {
   try {
     // console.log('queueController', queueController.data())
     const notificationRef = admin.firestore().collection('ecom_notifications')
-    const query = notificationRef.where('ready_at', '<=', admin.firestore.Timestamp.now().toMillis())
     const queueState = queueController.data()
-    if (queueState.running) {
-      if (!queueState.store_ids || !queueState.store_ids.length) {
-        return
-      }
-      query.where('store_id', 'not-in', queueState.store_ids)
+    if (queueState.running && (!queueState.store_ids || !queueState.store_ids.length)) {
+      return
     }
-    query.orderBy('ready_at').limit(20)
+    const query = notificationRef
+      .where('ready_at', '<=', admin.firestore.Timestamp.now().toMillis())
+      .orderBy('ready_at').limit(600)
 
     const notificationDocs = await query.get()
     // console.log('notification docs', notificationDocs.empty)
@@ -216,15 +214,15 @@ const handleWorker = async () => {
     if (!notificationDocs.empty) {
       const docsToRun = []
       notificationDocs.forEach(doc => {
-        const data = doc.data()
-        if (!storeIds.includes(data.store_id)) {
-          if (storeIds.length >= 10) {
-            // https://firebase.google.com/docs/firestore/query-data/queries#limitations_2
-            return
+        if (docsToRun.length < 20) {
+          const data = doc.data()
+          if (!queueState.store_ids.includes(data.store_id)) {
+            if (!storeIds.includes(data.store_id)) {
+              storeIds.push(data.store_id)
+            }
+            docsToRun.push(run(doc, data))
           }
-          storeIds.push(data.store_id)
         }
-        docsToRun.push(run(doc, data))
       })
       queueControllerRef.doc(queueController.id).set({
         running: true,
