@@ -251,14 +251,6 @@ procedures.push({
     //   resource: 'customers',
     //   action: 'delete',
     // },
-    {
-      resource: 'applications',
-      field: 'data'
-    },
-    {
-      resource: 'applications',
-      field: 'hidden_data'
-    }
     // Feel free to create custom combinations with any Store API resource, subresource, action and field.
   ],
 
