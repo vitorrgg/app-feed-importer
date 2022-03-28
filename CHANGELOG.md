@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.1](https://github.com/ecomplus/application-starter/compare/v2.0.0...v2.0.1) (2022-03-28)
+
+
+### Bug Fixes
+
+* 🐛 fix woocommerce problem ([00c365a](https://github.com/ecomplus/application-starter/commit/00c365a7a681d4eef74e599625875e8a25e5672a))
+* error 400 data.sku should be string ([#18](https://github.com/ecomplus/application-starter/issues/18)) ([fc22f49](https://github.com/ecomplus/application-starter/commit/fc22f49819c01dbedb4740a2802bbe594a02e517))
+* **procedures:** trigger webhook for self app (not all) data edit only ([c820e8e](https://github.com/ecomplus/application-starter/commit/c820e8e4457f140e7a30c597128373bf3ec44129))
+* **task:** manually handle running store ids [[#33](https://github.com/ecomplus/application-starter/issues/33)] ([b6e9709](https://github.com/ecomplus/application-starter/commit/b6e9709f9890b602d5a67123ace85242dd5cc427))
+* **tasks:** may perform multiple concurrent queues with different stores [[#33](https://github.com/ecomplus/application-starter/issues/33)] ([dcd472b](https://github.com/ecomplus/application-starter/commit/dcd472b801c3ebb510248515f0393d77a3a459fb))
+* **tasks:** properly deal with concurrent (different stores) executions [[#33](https://github.com/ecomplus/application-starter/issues/33)] ([0a07a52](https://github.com/ecomplus/application-starter/commit/0a07a52e2dc009c61a88aad324c8e18dd3205888))
+* **worker:** edit function max time to 2mins [[#33](https://github.com/ecomplus/application-starter/issues/33)] ([c2a47a7](https://github.com/ecomplus/application-starter/commit/c2a47a7f5320f4e2158b3485d3cab51ad13b7aa8))
+* **worker:** increase function used memory to 512mb ([36cc2ba](https://github.com/ecomplus/application-starter/commit/36cc2ba5a972db57b92284eace0e14401ab16a49))
+* **worker:** revert to 256mb due to out of memory error ([9af7ba8](https://github.com/ecomplus/application-starter/commit/9af7ba8c077f2615493647bf1b213b59b478eef9))
+* **worker:** set function timeout to ~9min [[#33](https://github.com/ecomplus/application-starter/issues/33)] ([ed6dec0](https://github.com/ecomplus/application-starter/commit/ed6dec08417d62b0ec41162afc254769e29bba46))
+
 ## [2.0.0](https://github.com/ecomplus/application-starter/compare/v1.0.0...v2.0.0) (2022-01-12)
 
 ## 1.0.0 (2021-11-29)
