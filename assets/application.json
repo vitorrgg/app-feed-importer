@@ -79,5 +79,5 @@
     }
   },
   "auth_callback_uri": "https://us-central1-ecom-feed-importer.cloudfunctions.net/app/ecom/auth-callback",
-  "version": "2.0.0"
+  "version": "2.0.1"
 }
