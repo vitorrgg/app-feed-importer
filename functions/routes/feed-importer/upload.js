@@ -13,7 +13,7 @@ exports.post = async ({ admin, appSdk }, req, res) => {
   if (!storeId) {
     return res.status(403).send('storeId is required!')
   }
-  const auth = await appSdk.getAuth(1117)
+  const auth = await appSdk.getAuth(storeId)
 
   const appData = await getAppData({ appSdk, storeId, auth }, true)
 
