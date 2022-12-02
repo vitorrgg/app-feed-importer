@@ -8,6 +8,7 @@ const getAppData = require('./../../lib/store-api/get-app-data')
 const addNotification = require('../../utils/addNotification')
 
 exports.post = async ({ admin, appSdk }, req, res) => {
+  console.log('requisition test', req)
   const storeId = req.storeId ? req.storeId : req.query.store_id
   const token = req.query.token
   if (!storeId) {
