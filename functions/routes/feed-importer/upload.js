@@ -4,20 +4,19 @@ const os = require('os')
 const busboy = require('busboy')
 const { v4: uuid } = require('uuid')
 const getAppData = require('./../../lib/store-api/get-app-data')
-// const { auth } = require('firebase-admin')
 
 const addNotification = require('../../utils/addNotification')
 
 exports.post = async ({ admin, appSdk }, req, res) => {
   console.log('requisition test', req.query)
-  const storeId = req.storeId ? req.storeId : req.query.store_id
+  const storeId = req.storeId ? Number(req.storeId) : Number(req.query.store_id)
   const token = req.query.token
   if (!storeId) {
     return res.status(403).send('storeId is required!')
   }
-  // const auth = await appSdk.getAuth(storeId)
+  const auth = await appSdk.getAuth(storeId)
 
-  const appData = await getAppData({ appSdk, storeId })
+  const appData = await getAppData({ appSdk, storeId, auth }, true)
 
   console.log(token, appData)
   if (!token || appData.__token !== token) {
