@@ -53,8 +53,12 @@ exports.post = async ({ admin, appSdk }, req, res) => {
     await Promise.all(fileWrites)
     const storageBucket = admin.storage().bucket('gs://ecom-feed-importer.appspot.com')
     for (const file in uploads) {
+      console.log(file)
+      console.log('---')
+      console.log(uploads)
       await storageBucket.upload(uploads[file])
       const fileId = `${guid}-${filename}`
+      console.log('Name of :', fileId)
       const [metadata] = await storageBucket.file(fileId).getMetadata()
       addNotification(admin, {
         store_id: storeId,
