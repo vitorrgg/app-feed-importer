@@ -215,7 +215,6 @@ const parseProduct = async (buffer, contentType) => {
       console.log('Each row', index)
       if (index === 1) {
         row.eachCell((cell, columnNumber) => {
-          console.log('Get cell', cell)
           let key = (MAPPED_COLUMNS.find(({ tableColumn }) => tableColumn === getKey(cell.text)) || {}).feedColumn
           key = key || getKey(cell.text)
           console.log('--get key ---')
@@ -225,9 +224,10 @@ const parseProduct = async (buffer, contentType) => {
             columns.push(getKey(cell.text))
           }
         })
+        console.log('--- columns ---')
+        console.log(columns)
       } else {
         const data = {}
-        console.log('Colunas mapeadas', MAPPED_COLUMNS)
         for (const mapped of MAPPED_COLUMNS) {
           if (columns.includes(mapped.tableColumn)) {
             if (typeof mapped.parser === 'function') {
