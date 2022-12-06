@@ -211,6 +211,10 @@ const parseProduct = async (buffer, contentType) => {
     const columns = []
     console.log('Test worksheet')
     console.log(worksheet)
+    console.log('----')
+    console.log(worksheet._worksheets)
+    console.log('----')
+    console.log(worksheet._worksheets)
     worksheet.eachRow((row, index) => {
       if (index === 1) {
         row.eachCell((cell, columnNumber) => {
