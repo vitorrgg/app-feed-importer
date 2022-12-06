@@ -16,7 +16,7 @@ const MAPPED_COLUMNS = [
     }
   },
   {
-    tableColumn: 'requerida-sku',
+    tableColumn: 'sku',
     feedColumn: 'g:sku'
   },
   {
@@ -212,12 +212,13 @@ const parseProduct = async (buffer, contentType) => {
     console.log('Test worksheet')
     const sheetResult = worksheet.getWorksheet(1)
     sheetResult.eachRow((row, index) => {
-      console.log('Each row', index, row)
+      console.log('Each row', index)
       if (index === 1) {
         row.eachCell((cell, columnNumber) => {
+          console.log('Get cell', cell)
           let key = (MAPPED_COLUMNS.find(({ tableColumn }) => tableColumn === getKey(cell.text)) || {}).feedColumn
           key = key || getKey(cell.text)
-          console.log('')
+          console.log('--get key ---')
           console.log(key)
           if (key) {
             sheetResult.getColumn(columnNumber).key = key
