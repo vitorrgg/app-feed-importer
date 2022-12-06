@@ -212,10 +212,13 @@ const parseProduct = async (buffer, contentType) => {
     console.log('Test worksheet')
     const sheetResult = worksheet.getWorksheet(1)
     sheetResult.eachRow((row, index) => {
+      console.log('Each row', index, row)
       if (index === 1) {
         row.eachCell((cell, columnNumber) => {
           let key = (MAPPED_COLUMNS.find(({ tableColumn }) => tableColumn === getKey(cell.text)) || {}).feedColumn
           key = key || getKey(cell.text)
+          console.log('')
+          console.log(key)
           if (key) {
             sheetResult.getColumn(columnNumber).key = key
             columns.push(getKey(cell.text))
@@ -223,6 +226,7 @@ const parseProduct = async (buffer, contentType) => {
         })
       } else {
         const data = {}
+        console.log('Colunas mapeadas', MAPPED_COLUMNS)
         for (const mapped of MAPPED_COLUMNS) {
           if (columns.includes(mapped.tableColumn)) {
             if (typeof mapped.parser === 'function') {
