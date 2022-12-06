@@ -205,10 +205,12 @@ const parseProduct = async (buffer, contentType) => {
       stream.push(null)
       worksheet = await workbook.csv.read(stream, { parserOptions: { delimiter: ';' } })
     } else {
-      worksheet = await workbook.xlsx.load(buffer, { parserOptions: { delimiter: ';' } })
+      worksheet = await workbook.xlsx.load(buffer)
     }
     const values = []
     const columns = []
+    console.log('Test worksheet')
+    console.log(worksheet)
     worksheet.eachRow((row, index) => {
       if (index === 1) {
         row.eachCell((cell, columnNumber) => {
