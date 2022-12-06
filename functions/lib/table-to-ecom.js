@@ -210,20 +210,14 @@ const parseProduct = async (buffer, contentType) => {
     const values = []
     const columns = []
     console.log('Test worksheet')
-    console.log(worksheet)
-    console.log('----')
-    console.log(worksheet.getWorksheet(0))
-    console.log('----')
-    console.log(worksheet.getWorksheet(1))
-    console.log('----')
-    console.log(worksheet.getWorksheet('Sheet1'))
-    worksheet.getWorksheet('Sheet1').eachRow((row, index) => {
+    const sheetResult = worksheet.getWorksheet(1)
+    sheetResult.eachRow((row, index) => {
       if (index === 1) {
         row.eachCell((cell, columnNumber) => {
           let key = (MAPPED_COLUMNS.find(({ tableColumn }) => tableColumn === getKey(cell.text)) || {}).feedColumn
           key = key || getKey(cell.text)
           if (key) {
-            worksheet.getColumn(columnNumber).key = key
+            sheetResult.getColumn(columnNumber).key = key
             columns.push(getKey(cell.text))
           }
         })
@@ -232,7 +226,7 @@ const parseProduct = async (buffer, contentType) => {
         for (const mapped of MAPPED_COLUMNS) {
           if (columns.includes(mapped.tableColumn)) {
             if (typeof mapped.parser === 'function') {
-              data[mapped.feedColumn] = mapped.parser(row, row.getCell(mapped.feedColumn).text, { worksheet, data })
+              data[mapped.feedColumn] = mapped.parser(row, row.getCell(mapped.feedColumn).text, { sheetResult, data })
             } else {
               data[mapped.feedColumn] = row.getCell(mapped.feedColumn).text
             }
