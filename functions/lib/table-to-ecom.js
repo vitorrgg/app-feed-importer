@@ -213,7 +213,11 @@ const parseProduct = async (buffer, contentType) => {
     console.log(worksheet)
     console.log('----')
     console.log(worksheet.getWorksheet(0))
-    worksheet.getWorksheet(0).eachRow((row, index) => {
+    console.log('----')
+    console.log(worksheet.getWorksheet(1))
+    console.log('----')
+    console.log(worksheet.getWorksheet('Sheet1'))
+    worksheet.getWorksheet('Sheet1').eachRow((row, index) => {
       if (index === 1) {
         row.eachCell((cell, columnNumber) => {
           let key = (MAPPED_COLUMNS.find(({ tableColumn }) => tableColumn === getKey(cell.text)) || {}).feedColumn
