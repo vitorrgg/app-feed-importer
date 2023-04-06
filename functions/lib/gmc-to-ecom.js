@@ -218,14 +218,12 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
     }
     const salePrice = getFeedValueByKey('sale_price', feedProduct)
     const basePrice = getFeedValueByKey('price', feedProduct)
-    logger.log('Sale price', salePrice)
-    logger.log('Sale price regex', salePrice.replace(/[a-z$A-Z]/g, '').trim())
-    logger.log('Price', basePrice)
+
     if (salePrice && basePrice) {
-      newProductData.price = salePrice.replace(/[a-z$A-Z]/g, '').trim()
-      newProductData.base_price = basePrice.replace(/[a-z$A-Z]/g, '').trim()
+      newProductData.price = Number(salePrice.replace(/[a-z$A-Z]/g, '').trim())
+      newProductData.base_price = Number(basePrice.replace(/[a-z$A-Z]/g, '').trim())
     } else if (basePrice) {
-      newProductData.price = basePrice.replace(/[a-z$A-Z]/g, '').trim()
+      newProductData.price = Number(basePrice.replace(/[a-z$A-Z]/g, '').trim())
     }
     const effectiveDate = getFeedValueByKey('sale_price_effective_date', feedProduct).split('/')
     if (effectiveDate && effectiveDate.length === 2) {
