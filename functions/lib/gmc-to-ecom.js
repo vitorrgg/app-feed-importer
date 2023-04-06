@@ -205,8 +205,6 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
       meta_title: getFeedValueByKey('title', feedProduct),
       meta_description: (getFeedValueByKey('description', feedProduct) || '').slice(0, 1000),
       keywords: htmlParser.parse(getFeedValueByKey('google_product_category', feedProduct) || '').textContent.split('>').map(x => x.trim().substring(0, 49)),
-      base_price: Number(getFeedValueByKey('price', feedProduct).replace(/[a-z$A-Z]/g, '').trim()),
-      price: Number(getFeedValueByKey('sale_price', feedProduct).replace(/[a-z$A-Z]/g, '').trim()),
       quantity: 0, // get on availability
       body_html: getFeedValueByKey('description', feedProduct),
       weight: {
@@ -217,6 +215,17 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
       variations: [],
       categories: categories ? [categories] : [],
       specifications: getSpecifications(feedProduct)
+    }
+    const salePrice = getFeedValueByKey('sale_price', feedProduct)
+    const basePrice = getFeedValueByKey('price', feedProduct)
+    logger.log('Sale price', salePrice)
+    logger.log('Sale price regex', salePrice.replace(/[a-z$A-Z]/g, '').trim())
+    logger.log('Price', basePrice)
+    if (salePrice && basePrice) {
+      newProductData.price = salePrice.replace(/[a-z$A-Z]/g, '').trim()
+      newProductData.base_price = basePrice.replace(/[a-z$A-Z]/g, '').trim()
+    } else if (basePrice) {
+      newProductData.price = basePrice.replace(/[a-z$A-Z]/g, '').trim()
     }
     const effectiveDate = getFeedValueByKey('sale_price_effective_date', feedProduct).split('/')
     if (effectiveDate && effectiveDate.length === 2) {
@@ -259,7 +268,7 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
     product = Object.assign(product, newProductData)
 
     delete product._id
-    logger.log(`[PRODUCT-TO-ECOM:parseProduct | SUCCESS] - ${storeId}`, JSON.stringify(product))
+    logger.log(`[PRODUCT-TO-ECOM:parseProduct | SUCCESS] - ${storeId}`, product.sku, product.price)
     return product
   } catch (error) {
     logger.error('[PRODUCT-TO-ECOM:parseProduct | ERROR]', error)
