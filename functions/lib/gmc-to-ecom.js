@@ -205,8 +205,8 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
       meta_title: getFeedValueByKey('title', feedProduct),
       meta_description: (getFeedValueByKey('description', feedProduct) || '').slice(0, 1000),
       keywords: htmlParser.parse(getFeedValueByKey('google_product_category', feedProduct) || '').textContent.split('>').map(x => x.trim().substring(0, 49)),
-      base_price: Number(getFeedValueByKey('price', feedProduct).replace(/[a-z A-Z]/g, '').trim()),
-      price: Number(getFeedValueByKey('sale_price', feedProduct).replace(/[a-z A-Z]/g, '').trim()),
+      base_price: Number(getFeedValueByKey('price', feedProduct).replace(/[a-z$A-Z]/g, '').trim()),
+      price: Number(getFeedValueByKey('sale_price', feedProduct).replace(/[a-z$A-Z]/g, '').trim()),
       quantity: 0, // get on availability
       body_html: getFeedValueByKey('description', feedProduct),
       weight: {
@@ -217,6 +217,15 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
       variations: [],
       categories: categories ? [categories] : [],
       specifications: getSpecifications(feedProduct)
+    }
+    const effectiveDate = getFeedValueByKey('sale_price_effective_date', feedProduct).split('/')
+    if (effectiveDate && effectiveDate.length === 2) {
+      const dateStart = new Date(effectiveDate[0])
+      const dateEnd = new Date(effectiveDate[1])
+      newProductData.price_effective_date = {
+        start: dateStart.toISOString(),
+        end: dateEnd.toISOString()
+      }
     }
 
     const brands = await getBrand(appSdk, storeId, feedProduct) ? [await getBrand(appSdk, storeId, feedProduct)] : undefined
@@ -250,7 +259,6 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
     product = Object.assign(product, newProductData)
 
     delete product._id
-    console.log('[PARSED PRODUCT]', product)
     logger.log(`[PRODUCT-TO-ECOM:parseProduct | SUCCESS] - ${storeId}`, JSON.stringify(product))
     return product
   } catch (error) {
@@ -310,7 +318,7 @@ const saveEcomProduct = async (appSdk, appData, storeId, feedProduct, variations
       ecomResponse = response.data || { _id }
       if (isVariation) {
         const { result: savedProduct } = await findEcomProductBySKU(appSdk, storeId, sku)
-        console.log('-----------------------savedProduct', savedProduct)
+        console.log('-----------------------savedProduct')
         await saveEcomVariations(appSdk, appData, storeId, variations, savedProduct[0])
       }
     }
@@ -334,7 +342,7 @@ const saveEcomVariations = async (appSdk, appData, storeId, variations, product)
       parsedVariations.push(parsedVariation)
     }
 
-    console.log('quebra aqui ------', product)
+    console.log('quebra aqui ------')
 
     await appSdk.apiRequest(parseInt(storeId), `/products/${product._id}.json`, 'PATCH', { variations: parsedVariations })
   } catch (error) {
