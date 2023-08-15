@@ -269,7 +269,7 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
     logger.log(`[PRODUCT-TO-ECOM:parseProduct | SUCCESS] - ${storeId}`, product.sku, product.price)
     return product
   } catch (error) {
-    logger.error('[PRODUCT-TO-ECOM:parseProduct | ERROR]', error)
+    logger.error(`[PRODUCT-TO-ECOM:parseProduct | ERROR] - ${storeId}`, error)
     if (error && error.response) {
       meta.parseProductError = { data: error.response.data || '', config: error.response.config || '' }
       logger.error({ data: error.response.data })
