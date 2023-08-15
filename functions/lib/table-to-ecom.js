@@ -50,9 +50,9 @@ const MAPPED_COLUMNS = [
     tableColumn: 'imagem-1',
     feedColumn: 'g:image_link',
     parser: (row, value, options = {}) => {
-      console.log('row', JSON.stringify(row))
+      console.log('row', row)
       console.log('value',value)
-      console.log('options', JSON.stringify(options))
+      console.log('options', options)
       const { data, worksheet } = options
       const images = []
       data['g:additional_image_link'] = images
