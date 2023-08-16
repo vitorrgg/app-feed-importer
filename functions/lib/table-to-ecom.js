@@ -50,21 +50,20 @@ const MAPPED_COLUMNS = [
     tableColumn: 'imagem-1',
     feedColumn: 'g:image_link',
     parser: (row, value, options = {}) => {
-      console.log('row', row)
-      console.log('value',value)
-      console.log('options', options)
       const { data, worksheet } = options
       const images = []
       data['g:additional_image_link'] = images
-      row.eachCell((_, columnNumber) => {
-        const key = worksheet.getColumn(columnNumber).key
-        if (key && key.indexOf('imagem-') !== -1) {
-          images.push(row.getCell(key).text)
-        }
-        if (images.length > 0) {
-          data['g:additional_image_link'] = images
-        }
-      })
+      if (worksheet) {
+        row.eachCell((_, columnNumber) => {
+          const key = worksheet.getColumn(columnNumber).key
+          if (key && key.indexOf('imagem-') !== -1) {
+            images.push(row.getCell(key).text)
+          }
+          if (images.length > 0) {
+            data['g:additional_image_link'] = images
+          }
+        })
+      }
       if (!value && images.length > 0) {
         return images[0]
       }
