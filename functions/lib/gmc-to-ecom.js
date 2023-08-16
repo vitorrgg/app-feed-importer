@@ -346,6 +346,9 @@ const saveEcomVariations = async (appSdk, appData, storeId, variations, product)
       const variationFound = (product && product.variations && product.variations
         .find(x => (x.sku || '').toString() === sku.toString())) || {}
       const parsedVariation = await parseVariations(appSdk, appData, auth, storeId, variation, variationFound)
+      if (parsedVariation && parseVariations.specifications && !(Object.keys(parseVariations.specifications).length)) {
+        return
+      }
       parsedVariations.push(parsedVariation)
     }
 

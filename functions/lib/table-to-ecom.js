@@ -33,6 +33,7 @@ const MAPPED_COLUMNS = [
           return sku.split('-')[0]
         }
       }
+      return ''
     }
   },
   {
@@ -218,20 +219,15 @@ const parseProduct = async (buffer, contentType) => {
     console.log('Test worksheet')
     const sheetResult = worksheet.getWorksheet(1)
     sheetResult.eachRow((row, index) => {
-      console.log('Each row', index)
       if (index === 1) {
         row.eachCell((cell, columnNumber) => {
           let key = (MAPPED_COLUMNS.find(({ tableColumn }) => tableColumn === getKey(cell.text)) || {}).feedColumn
           key = key || getKey(cell.text)
-          console.log('--get key ---')
-          console.log(key)
           if (key) {
             sheetResult.getColumn(columnNumber).key = key
             columns.push(getKey(cell.text))
           }
         })
-        console.log('--- columns ---')
-        console.log(columns)
       } else {
         const data = {}
         for (const mapped of MAPPED_COLUMNS) {
@@ -246,7 +242,6 @@ const parseProduct = async (buffer, contentType) => {
         values.push(data)
       }
     })
-    console.log(values)
     return values
   } catch (error) {
     console.error(error)
