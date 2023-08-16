@@ -94,13 +94,19 @@ const MAPPED_COLUMNS = [
     parser: (row, _, options = {}) => {
       const { worksheet } = options
       const categories = []
+      console.log('worksheet', worksheet)
+      
       row.eachCell((_, columnNumber) => {
-        const key = worksheet.getColumn(columnNumber).key
-        if (key && key.indexOf('categoria-nome') !== -1) {
-          categories.push(row.getCell(key).text)
+        console.log('underline', _)
+        console.log('column numb', columnNumber)
+        if (worksheet) {
+          const key = worksheet.getColumn(columnNumber).key
+          if (key && key.indexOf('categoria-nome') !== -1) {
+            categories.push(row.getCell(key).text)
+          }
         }
       })
-      return categories.join('>')
+      return categories && categories.length ? categories.join('>') : _
     }
   },
   {
