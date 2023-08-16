@@ -125,6 +125,7 @@ const MAPPED_COLUMNS = [
             return 'Male'
         }
       }
+      return ''
     }
   },
   {
@@ -144,6 +145,7 @@ const MAPPED_COLUMNS = [
             return 'adult'
         }
       }
+      return ''
     }
   },
   {
