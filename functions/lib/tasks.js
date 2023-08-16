@@ -31,18 +31,19 @@ const getFeed = async (feedUrl) => {
 const handleFeedQueue = async (storeId, products) => {
   try {
     logger.info('[handleFeedQueue]', JSON.stringify({ storeId }))
-    const groupedProducts = _.groupBy(products, (item) => _.get(item, 'g:item_group_id', 'without_variations'))
-
-    const { without_variations: withoutVariations } = groupedProducts
-    delete groupedProducts.without_variations
-    for (const key of Object.keys(groupedProducts)) {
-      const trigger = {
-        resource: 'feed_create_product',
-        body: groupedProducts[key],
-        store_id: storeId,
-        isVariation: true
+    if (products['g:item_group_id']) {
+      const groupedProducts = _.groupBy(products, (item) => _.get(item, 'g:item_group_id', 'without_variations'))
+      const { without_variations: withoutVariations } = groupedProducts
+      delete groupedProducts.without_variations
+      for (const key of Object.keys(groupedProducts)) {
+        const trigger = {
+          resource: 'feed_create_product',
+          body: groupedProducts[key],
+          store_id: storeId,
+          isVariation: true
+        }
+        addNotification(admin, trigger)
       }
-      addNotification(admin, trigger)
     }
 
     for (const product of withoutVariations || []) {
