@@ -29,7 +29,7 @@ const MAPPED_COLUMNS = [
           return sku.split('-')[0]
         }
       }
-      return ''
+      return undefined
     }
   },
   {
@@ -50,7 +50,8 @@ const MAPPED_COLUMNS = [
     tableColumn: 'imagem-1',
     feedColumn: 'g:image_link',
     parser: (row, value, options = {}) => {
-      const { data, worksheet } = options
+      const { data } = options
+      const worksheet = options.worksheet || options._worksheet
       const images = []
       data['g:additional_image_link'] = images
       if (worksheet) {
@@ -81,8 +82,12 @@ const MAPPED_COLUMNS = [
     }
   },
   {
-    tableColumn: 'preco-cheio',
+    tableColumn: 'preco-promocional',
     feedColumn: 'g:sale_price'
+  },
+  {
+    tableColumn: 'preco-cheio',
+    feedColumn: 'g:price'
   },
   {
     tableColumn: 'marca',
@@ -92,13 +97,11 @@ const MAPPED_COLUMNS = [
     tableColumn: 'categoria-nome-nivel-1',
     feedColumn: 'g:google_product_category',
     parser: (row, _, options = {}) => {
-      const { worksheet } = options
+      const worksheet = options.worksheet || options._worksheet
       const categories = []
       console.log('worksheet', worksheet)
       
       row.eachCell((_, columnNumber) => {
-        console.log('underline', _)
-        console.log('column numb', columnNumber)
         if (worksheet) {
           const key = worksheet.getColumn(columnNumber).key
           if (key && key.indexOf('categoria-nome') !== -1) {
