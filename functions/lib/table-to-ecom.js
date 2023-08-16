@@ -261,7 +261,7 @@ const parseProduct = async (buffer, contentType) => {
           if (columns.includes(mapped.tableColumn)) {
             if (typeof mapped.parser === 'function') {
               data[mapped.feedColumn] = mapped.parser(row, row.getCell(mapped.feedColumn).text, { sheetResult, data })
-              if (row.getCell(mapped.feedColumn).text === 'sem-variacao') {
+              if (data[mapped.feedColumn] && data[mapped.feedColumn].length === 0) {
                 delete data[mapped.feedColumn]
               }
             } else {
