@@ -206,21 +206,21 @@ const MAPPED_COLUMNS = [
     tableColumn: 'altura-em-cm',
     feedColumn: 'g:shipping_height',
     parser: (_, value) => {
-      return `${value || '0'} cm`
+      return `${value || '1'} cm`
     }
   },
   {
     tableColumn: 'largura-em-cm',
     feedColumn: 'g:shipping_width',
     parser: (_, value) => {
-      return `${value || '0'} cm`
+      return `${value || '1'} cm`
     }
   },
   {
     tableColumn: 'comprimento-em-cm',
     feedColumn: 'g:shipping_length',
     parser: (_, value) => {
-      return `${value || '0'} cm`
+      return `${value || '1'} cm`
     }
   }
 ]
@@ -261,6 +261,9 @@ const parseProduct = async (buffer, contentType) => {
           if (columns.includes(mapped.tableColumn)) {
             if (typeof mapped.parser === 'function') {
               data[mapped.feedColumn] = mapped.parser(row, row.getCell(mapped.feedColumn).text, { sheetResult, data })
+              if (row.getCell(mapped.feedColumn).text === 'sem-variacao') {
+                delete data[mapped.feedColumn]
+              }
             } else {
               data[mapped.feedColumn] = row.getCell(mapped.feedColumn).text
             }
