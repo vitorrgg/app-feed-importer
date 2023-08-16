@@ -98,7 +98,6 @@ const MAPPED_COLUMNS = [
     parser: (row, _, options = {}) => {
       const worksheet = options.worksheet || options.sheetResult
       const categories = []
-      console.log('worksheet', worksheet)
       
       row.eachCell((_, columnNumber) => {
         if (worksheet) {
@@ -125,7 +124,6 @@ const MAPPED_COLUMNS = [
             return 'Male'
         }
       }
-      return ''
     }
   },
   {
@@ -135,7 +133,6 @@ const MAPPED_COLUMNS = [
       if (value) {
         switch (value.toLowerCase()) {
           case 'recem nascida':
-            return 'adult'
           case 'infantil':
             return 'infant'
           case 'crianca pequena':
@@ -146,7 +143,6 @@ const MAPPED_COLUMNS = [
             return 'adult'
         }
       }
-      return 'adult'
     }
   },
   {
