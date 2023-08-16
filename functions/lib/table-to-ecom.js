@@ -184,6 +184,10 @@ const MAPPED_COLUMNS = [
     feedColumn: 'g:gtin'
   },
   {
+    tableColumn: 'mpn',
+    feedColumn: 'g:mpn'
+  },
+  {
     tableColumn: 'seo-tag-title',
     feedColumn: 'g:meta_title'
   },
@@ -196,6 +200,27 @@ const MAPPED_COLUMNS = [
     feedColumn: 'g:shipping_weight',
     parser: (_, value) => {
       return `${value || '0'} kg`
+    }
+  },
+  {
+    tableColumn: 'altura-em-cm',
+    feedColumn: 'g:shipping_height',
+    parser: (_, value) => {
+      return `${value || '0'} cm`
+    }
+  },
+  {
+    tableColumn: 'largura-em-cm',
+    feedColumn: 'g:shipping_width',
+    parser: (_, value) => {
+      return `${value || '0'} cm`
+    }
+  },
+  {
+    tableColumn: 'comprimento-em-cm',
+    feedColumn: 'g:shipping_length',
+    parser: (_, value) => {
+      return `${value || '0'} cm`
     }
   }
 ]

@@ -88,7 +88,7 @@ const getBrand = async (appSdk, storeId, feedProduct) => {
   try {
     const gmcBrand = htmlParser.parse(getFeedValueByKey('brand', feedProduct) || '')
     const brandName = gmcBrand.textContent.trim()
-    const brandSlug = slugify(brandName, { strict: true, replacement: '_', lower: true })
+    const brandSlug = slugify(brandName, { strict: true, replacement: '-', lower: true })
     if (brandSlug === '') {
       return
     }
@@ -129,7 +129,7 @@ const getCategory = async (appSdk, storeId, feedProduct) => {
     const gmcCategory = htmlParser.parse(getFeedValueByKey('google_product_category', feedProduct) || '')
     if (gmcCategory.textContent) {
       const categoryName = gmcCategory.textContent.split('>').reverse()[0].trim()
-      const categorySlug = slugify(categoryName, { strict: true, replacement: '_', lower: true })
+      const categorySlug = slugify(categoryName, { strict: true, replacement: '-', lower: true })
       console.log('------------', 'getCategory', categoryName)
       const category = await findCategoryByName(appSdk, storeId, categoryName)
       if (category && Array.isArray(category.result) && category.result.length) {
@@ -240,21 +240,33 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
       newProductData.brands = brands
     }
 
-    const slug = slugify(getFeedValueByKey('title', feedProduct), { strict: true, replacement: '_', lower: true })
+    const slug = slugify(getFeedValueByKey('title', feedProduct), { strict: true, replacement: '-', lower: true })
     if (slug) {
       newProductData.slug = slug
     }
 
     const gtin = getFeedValueByKey('gtin', feedProduct)
+    const mpn = getFeedValueByKey('mpn', feedProduct)
     if (!newProductData.price) {
       newProductData.price = newProductData.base_price
     }
     if (gtin) {
       newProductData.gtin = [gtin.toString()]
     }
+    if (mpn) {
+      newProductData.mpn = [mpn.toString()]
+    }
     if (condition) {
       newProductData.condition = condition
     }
+    const dimensions = ['shipping_length', 'shipping_width', 'shipping_height']
+    newProductData.dimensions = {}
+    dimensions.forEach(dimension => {
+      newProductData.dimensions[dimension.replace('shipping_', '')] = {
+        value: Number(getFeedValueByKey(dimension, feedProduct)) || 1,
+        unit: 'cm'
+      }
+    })
 
     let quantity = 0
     if (getFeedValueByKey('availability', feedProduct).toLowerCase() === 'in stock') {
