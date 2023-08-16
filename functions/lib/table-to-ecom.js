@@ -184,7 +184,7 @@ const MAPPED_COLUMNS = [
     feedColumn: 'g:gtin'
   },
   {
-    tableColumn: 'mpn',
+    tableColumn: 'ncm',
     feedColumn: 'g:mpn'
   },
   {
@@ -261,7 +261,7 @@ const parseProduct = async (buffer, contentType) => {
           if (columns.includes(mapped.tableColumn)) {
             if (typeof mapped.parser === 'function') {
               data[mapped.feedColumn] = mapped.parser(row, row.getCell(mapped.feedColumn).text, { sheetResult, data })
-              if (data[mapped.feedColumn] && data[mapped.feedColumn].length === 0) {
+              if (row.getCell(mapped.feedColumn).text === 'sem-variacao') {
                 delete data[mapped.feedColumn]
               }
             } else {

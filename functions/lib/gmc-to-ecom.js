@@ -328,7 +328,7 @@ const saveEcomProduct = async (appSdk, appData, storeId, feedProduct, variations
     const method = _id ? 'PATCH' : 'POST'
     const parsedProduct = await parseProduct(appSdk, appData, auth, storeId, feedProduct, product, meta)
     let ecomResponse = {}
-
+    console.log('Enviando produto', JSON.stringify(parseProduct))
     if (appData.update_product || method === 'POST') {
       const ecomRequest = { resource, method, parsedProduct: JSON.stringify(parsedProduct || '') }
       meta.ecomRequest = ecomRequest

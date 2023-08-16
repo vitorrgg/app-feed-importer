@@ -111,9 +111,6 @@ const run = async (snap, data = null) => {
       : [product['g:additional_image_link']]
 
     const imageLinks = _.compact([product['g:image_link'], ...(aditionalImages || [])])
-    if (storeId == 51412) {
-      console.log('Images #51412', JSON.stringify(imageLinks), JSON.stringify(product))
-    }
 
     switch (resource) {
       case 'applications':
