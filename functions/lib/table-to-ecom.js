@@ -20,8 +20,12 @@ const MAPPED_COLUMNS = [
     feedColumn: 'g:sku'
   },
   {
+    tableColumn: 'preco-cheio',
+    feedColumn: 'g:price'
+  },
+  {
     tableColumn: 'tipo',
-    feedColumn: 'g:item_group_id',
+    feedColumn:  'g:item_group_id',
     parser: (row, value) => {
       if (['variacao', 'com-variacao'].includes(value)) {
         const sku = row.getCell('g:sku').text
@@ -29,7 +33,6 @@ const MAPPED_COLUMNS = [
           return sku.split('-')[0]
         }
       }
-      return undefined
     }
   },
   {
@@ -51,7 +54,7 @@ const MAPPED_COLUMNS = [
     feedColumn: 'g:image_link',
     parser: (row, value, options = {}) => {
       const { data } = options
-      const worksheet = options.worksheet || options._worksheet
+      const worksheet = options.worksheet || options.sheetResult
       const images = []
       data['g:additional_image_link'] = images
       if (worksheet) {
@@ -86,10 +89,6 @@ const MAPPED_COLUMNS = [
     feedColumn: 'g:sale_price'
   },
   {
-    tableColumn: 'preco-cheio',
-    feedColumn: 'g:price'
-  },
-  {
     tableColumn: 'marca',
     feedColumn: 'g:brand'
   },
@@ -97,7 +96,7 @@ const MAPPED_COLUMNS = [
     tableColumn: 'categoria-nome-nivel-1',
     feedColumn: 'g:google_product_category',
     parser: (row, _, options = {}) => {
-      const worksheet = options.worksheet || options._worksheet
+      const worksheet = options.worksheet || options.sheetResult
       const categories = []
       console.log('worksheet', worksheet)
       
@@ -147,7 +146,7 @@ const MAPPED_COLUMNS = [
             return 'adult'
         }
       }
-      return ''
+      return 'adult'
     }
   },
   {
