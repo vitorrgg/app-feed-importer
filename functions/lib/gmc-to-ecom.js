@@ -269,8 +269,18 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
     })
 
     let quantity = 0
-    if (getFeedValueByKey('availability', feedProduct).toLowerCase() === 'in stock') {
-      quantity = appData.default_quantity || 9999
+    const availability = getFeedValueByKey('availability', feedProduct)
+    if (availability) {
+      if (availability.toLowerCase() === 'in stock') {
+        newProductData.quantity = appData.default_quantity || 9999
+      } else if (Number(availability) > 0) {
+        newProductData.quantity = Number(availability)
+      } else if (storeId == 51412 && (Number(availability) === 0 || Number(availability) < 0)) {
+        newProductData.quantity = 9999
+        newProductData.production_time = {
+          days: 10
+        }
+      }
     }
 
     product.quantity = quantity

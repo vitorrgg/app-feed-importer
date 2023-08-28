@@ -77,13 +77,7 @@ const MAPPED_COLUMNS = [
   },
   {
     tableColumn: 'estoque-quantidade',
-    feedColumn: 'g:availability',
-    parser: (row, value) => {
-      if (value && Number(value) > 0) {
-        return 'in stock'
-      }
-      return 'out of stock'
-    }
+    feedColumn: 'g:availability'
   },
   {
     tableColumn: 'preco-promocional',
