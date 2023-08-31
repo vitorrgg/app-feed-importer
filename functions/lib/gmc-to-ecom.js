@@ -343,7 +343,7 @@ const saveEcomProduct = async (appSdk, appData, storeId, feedProduct, variations
       const ecomRequest = { resource, method, parsedProduct: JSON.stringify(parsedProduct || '') }
       meta.ecomRequest = ecomRequest
       const { response } = await appSdk.apiRequest(parseInt(storeId), resource, method, parsedProduct)
-      logger.info(`#${storeId} Produto criado`, response)
+      logger.info(`#${storeId} Produto criado`, response.status)
       ecomResponse = response.data || { _id }
       if (isVariation) {
         const { result: savedProduct } = await findEcomProductBySKU(appSdk, storeId, sku)
