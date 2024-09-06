@@ -207,15 +207,15 @@ const handleWorker = async () => {
     }
     const query = notificationRef
       .where('ready_at', '<=', admin.firestore.Timestamp.now().toMillis())
-      .orderBy('ready_at').limit(400)
+      .orderBy('ready_at').limit(100)
 
     const notificationDocs = await query.get()
-    console.log('notification docs', notificationDocs.empty)
+    // console.log('notification docs', notificationDocs.empty)
     const storeIds = []
     if (!notificationDocs.empty) {
       const docsToRun = []
       notificationDocs.forEach(doc => {
-        if (docsToRun.length < 40) {
+        if (docsToRun.length < 20) {
           const data = doc.data()
           if (queueState && queueState.store_ids && !queueState.store_ids.includes(data.store_id)) {
             if (!storeIds.includes(data.store_id)) {
