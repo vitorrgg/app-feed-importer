@@ -214,14 +214,24 @@ const handleWorker = async () => {
     const storeIds = []
     if (!notificationDocs.empty) {
       const docsToRun = []
+      const docsImgToRun = []
       notificationDocs.forEach(doc => {
-        if (docsToRun.length < 20) {
-          const data = doc.data()
+        const data = doc.data()
+        if (docsToRun.length < 30 && data.resource !== 'feed_import_image') {
           if (queueState && queueState.store_ids && !queueState.store_ids.includes(data.store_id)) {
             if (!storeIds.includes(data.store_id)) {
               storeIds.push(data.store_id)
             }
             docsToRun.push(run(doc, data))
+          }
+        }
+
+        if (docsImgToRun.length < 5 && data.resource === 'feed_import_image') {
+          if (queueState && queueState.store_ids && !queueState.store_ids.includes(data.store_id)) {
+            if (!storeIds.includes(data.store_id)) {
+              storeIds.push(data.store_id)
+            }
+            docsImgToRun.push(run(doc, data))
           }
         }
       })
@@ -230,6 +240,7 @@ const handleWorker = async () => {
         store_ids: storeIds
       }, { merge: true })
       await Promise.allSettled(docsToRun)
+      await Promise.allSettled(docsImgToRun)
     }
 
     queueControllerSnap = await queueControllerRef.get()
