@@ -83,7 +83,8 @@ const handleFeedTableQueue = async (notification) => {
     const products = await tableToEcom.parseProduct(data, body.contentType)
     await handleFeedQueue(storeId, products)
   } catch (error) {
-    logger.error('[tableToEcom.parseProduct:error]', { error })
+    logger.warn('[tableToEcom.parseProduct:error]')
+    logger.error(error)
     throw error
   }
 }

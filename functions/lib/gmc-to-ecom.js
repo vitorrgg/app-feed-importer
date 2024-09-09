@@ -200,7 +200,8 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
     const categories = await getCategory(appSdk, storeId, feedProduct)
     const condition = getFeedValueByKey('condition', feedProduct)
     const newProductData = {
-      sku: (getFeedValueByKey('sku', feedProduct) || getFeedValueByKey('id', feedProduct) || getFeedValueByKey('ID', feedProduct)).toString(),
+      sku: (getFeedValueByKey('sku', feedProduct) || getFeedValueByKey('id', feedProduct) || getFeedValueByKey('ID', feedProduct)).toString()
+        .replace(/\s+/g, '_'),
       name: getFeedValueByKey('title', feedProduct),
       subtitle: getFeedValueByKey('subtitle', feedProduct),
       meta_title: getFeedValueByKey('title', feedProduct),
@@ -269,14 +270,14 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
       }
     })
 
-    let quantity = 0
+    const quantity = 0 // todo: let ?
     const availability = getFeedValueByKey('availability', feedProduct)
     if (availability) {
       if (availability.toLowerCase() === 'in stock') {
         newProductData.quantity = appData.default_quantity || 9999
       } else if (Number(availability) > 0) {
         newProductData.quantity = Number(availability)
-      } else if (storeId == 51412 && (Number(availability) === 0 || Number(availability) < 0)) {
+      } else if (storeId === 51412 && (Number(availability) === 0 || Number(availability) < 0)) {
         newProductData.quantity = 9999
         newProductData.production_time = {
           days: 10
@@ -332,6 +333,7 @@ const saveEcomProduct = async (appSdk, appData, storeId, feedProduct, variations
   try {
     const auth = await appSdk.getAuth(parseInt(storeId, 10))
     const sku = (getFeedValueByKey('sku', feedProduct) || getFeedValueByKey('id', feedProduct)).toString()
+      .replace(/\s+/g, '_')
     const { result } = await findEcomProductBySKU(appSdk, storeId, sku, meta)
     const product = result.length > 0 ? result[0] : {}
     const { _id } = product
@@ -366,6 +368,7 @@ const saveEcomVariations = async (appSdk, appData, storeId, variations, product)
     const parsedVariations = []
     for (const variation of variations) {
       const sku = (getFeedValueByKey('sku', variations) || getFeedValueByKey('id', variations)).toString()
+        .replace(/\s+/g, '_')
       const variationFound = (product && product.variations && product.variations
         .find(x => (x.sku || '').toString() === sku.toString())) || {}
       const parsedVariation = await parseVariations(appSdk, appData, auth, storeId, variation, variationFound)
@@ -394,7 +397,9 @@ const saveEcomImages = async (appSdk, storeId, productId, imageLinks) => {
     for (const imageLink of imageLinks) {
       try {
         const newPicture = await tryImageUpload(storeId, auth, imageLink, product)
-        pictures.push(newPicture)
+        if (newPicture) {
+          pictures.push(newPicture)
+        }
       } catch (error) {
         if (error && error.response) {
           logger.error('saveEcomImages: error to save image ', { data: error.response.data })
