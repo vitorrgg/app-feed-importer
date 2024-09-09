@@ -224,7 +224,8 @@ const handleWorker = async () => {
       .where('ready_at', '<=', now)
       .orderBy('ready_at').limit(600)
 
-    const limitDocs = 50
+    const limitDocs = 100
+
     const notificationDocs = await query.get()
     const storeIds = []
     if (!notificationDocs.empty) {

@@ -92,7 +92,7 @@ const MAPPED_COLUMNS = [
     parser: (row, _, options = {}) => {
       const worksheet = options.worksheet || options.sheetResult
       const categories = []
-      
+
       row.eachCell((_, columnNumber) => {
         if (worksheet) {
           const key = worksheet.getColumn(columnNumber).key
