@@ -222,7 +222,14 @@ const handleWorker = async () => {
             if (!storeIds.includes(data.store_id)) {
               storeIds.push(data.store_id)
             }
-            docsToRun.push(run(doc, data))
+            docsToRun.push(
+              run(doc, data)
+                .catch((err) => {
+                  //  Todo: remove debug
+                  logger.error(err)
+                  throw err
+                })
+            )
           }
         }
       })
