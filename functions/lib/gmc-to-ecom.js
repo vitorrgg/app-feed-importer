@@ -150,7 +150,6 @@ const getCategory = async (appSdk, storeId, feedProduct) => {
 
 const tryImageUpload = async (storeId, auth, originImgUrl, product) => {
   try {
-    console.log(`> Try import prduct ${originImgUrl} #${storeId}`)
     const { data: imageToUpload } = await axios.get(originImgUrl, { responseType: 'arraybuffer' })
     const form = new FormData()
     form.append('file', Buffer.from(imageToUpload), originImgUrl.replace(/.*\/([^/]+)$/, '$1'))

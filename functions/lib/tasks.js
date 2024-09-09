@@ -127,9 +127,7 @@ const run = async (snap, data = null) => {
 
       case 'feed_create_product':
         productId = await saveEcomProduct(appSdk, appData, storeId, product, variations, isVariation, meta)
-        logger.log(productId, '--------------------')
         if (productId && productId._id && imageLinks.length) {
-          console.log('Importar imagem')
           addNotification(admin, {
             store_id: storeId,
             resource: 'feed_import_image',
@@ -205,7 +203,6 @@ const handleWorker = async () => {
   let queueController = queueControllerSnap.docs[0]
 
   try {
-    // console.log('queueController', queueController.data())
     const notificationRef = admin.firestore().collection('ecom_notifications')
     const queueState = queueController.data()
     const queueLastExecution = queueState.last_excution?.toMillis()
@@ -228,7 +225,6 @@ const handleWorker = async () => {
       .orderBy('ready_at').limit(100)
 
     const notificationDocs = await query.get()
-    // console.log('notification docs', notificationDocs.empty)
     const storeIds = []
     if (!notificationDocs.empty) {
       const docsToRun = []

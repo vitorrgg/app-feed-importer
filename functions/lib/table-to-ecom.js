@@ -11,7 +11,6 @@ const MAPPED_COLUMNS = [
     tableColumn: 'nome',
     feedColumn: 'g:title',
     parser: (_, value) => {
-      console.log(value)
       return value
     }
   },
@@ -146,7 +145,6 @@ const MAPPED_COLUMNS = [
     tableColumn: 'grade-produto-com-uma-cor',
     feedColumn: 'g:color',
     parser: (_, value, options = {}) => {
-      console.log(value)
       const { data } = options
       if (data && data['g:color']) {
         return data['g:color']
@@ -159,7 +157,6 @@ const MAPPED_COLUMNS = [
     feedColumn: 'g:color',
     parser: (_, value, options = {}) => {
       const { data } = options
-      console.log(value)
       if (data && data['g:color']) {
         return data['g:color']
       }
@@ -237,7 +234,6 @@ const parseProduct = async (buffer, contentType) => {
     }
     const values = []
     const columns = []
-    console.log('Test worksheet')
     const sheetResult = worksheet.getWorksheet(1)
     sheetResult.eachRow((row, index) => {
       if (index === 1) {
