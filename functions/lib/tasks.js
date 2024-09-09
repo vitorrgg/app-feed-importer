@@ -233,24 +233,28 @@ const handleWorker = async () => {
       notificationDocs.forEach(doc => {
         const data = doc.data()
         if (docsToRun.length < limitDocs) {
+          let isPushDoc = true
           if (queueState && queueState.store_ids && !queueState.store_ids.includes(data.store_id)) {
             if (!storeIds.includes(data.store_id)) {
               storeIds.push(data.store_id)
             }
             if (data.resource === 'feed_import_image') {
-              logger.info(`data: ${JSON.stringify(data)}`)
               const quantityImgs = data.body?.imageLinks?.length
               limitDocs -= quantityImgs || 0
-              logger.info(`limit:${limitDocs}`)
+            } else if (data.resource === 'feed_import_table') {
+              isPushDoc = limitDocs > 20
+              limitDocs = isPushDoc ? 0 : limitDocs
             }
-            docsToRun.push(
-              run(doc, data)
-                .catch((err) => {
-                  //  Todo: remove debug
-                  logger.error(err)
-                  throw err
-                })
-            )
+            if (isPushDoc) {
+              docsToRun.push(
+                run(doc, data)
+                  .catch((err) => {
+                    //  Todo: remove debug
+                    logger.error(err)
+                    throw err
+                  })
+              )
+            }
           }
         }
       })
