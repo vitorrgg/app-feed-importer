@@ -79,7 +79,7 @@ const handleFeedTableQueue = async (notification) => {
     const { body, store_id: storeId } = notification
     const storageBucket = admin.storage().bucket('gs://ecom-feed-importer.appspot.com')
     const [data] = await storageBucket.file(body.file_id).download()
-    logger.info(`[tableToEcom.parseProduct:start]: ${body.file_id} => ${data.length} bytes`)
+    logger.info(`[tableToEcom.parseProduct:start] => ${data.length} bytes`)
     const products = await tableToEcom.parseProduct(data, body.contentType)
     await handleFeedQueue(storeId, products)
   } catch (error) {
@@ -93,7 +93,7 @@ const run = async (snap, data = null) => {
   const meta = { }
   let hasError = false
   const notification = data || snap.data()
-  logger.info('[ecomNotification:start task]', JSON.stringify(notification))
+  logger.info(`[ecomNotification:start task]: ${snap.id} => ${JSON.stringify(notification)}, `)
   try {
     const appSdk = await setup(null, true, admin.firestore())
     const { resource, store_id: storeId, body, isVariation } = notification
