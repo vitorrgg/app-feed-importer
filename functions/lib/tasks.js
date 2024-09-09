@@ -203,6 +203,10 @@ const handleWorker = async () => {
     // console.log('queueController', queueController.data())
     const notificationRef = admin.firestore().collection('ecom_notifications')
     const queueState = queueController.data()
+    const queueLastExecution = queueState.last_excution?.toMillis()
+    if (queueLastExecution) {
+      console.log(`last ${queueLastExecution} ${queueLastExecution >= 2 * 60 * 1000}`)
+    }
     if (queueState.running && (!queueState.store_ids || !queueState.store_ids.length)) {
       return
     }
