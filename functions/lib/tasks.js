@@ -238,6 +238,7 @@ const handleWorker = async () => {
               storeIds.push(data.store_id)
             }
             if (data.resource === 'feed_import_image') {
+              logger.info(`data: ${JSON.stringify(data)}`)
               const quantityImgs = data.imageLinks?.length
               limitDocs -= quantityImgs || 0
               logger.info(`limit:${limitDocs}`)
