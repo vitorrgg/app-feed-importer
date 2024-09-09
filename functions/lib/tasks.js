@@ -79,9 +79,14 @@ const handleFeedTableQueue = async (notification) => {
     const { body, store_id: storeId } = notification
     const storageBucket = admin.storage().bucket('gs://ecom-feed-importer.appspot.com')
     const [data] = await storageBucket.file(body.file_id).download()
-    logger.info(`[tableToEcom.parseProduct:start] => ${data.length} bytes`)
-    const products = await tableToEcom.parseProduct(data, body.contentType)
-    await handleFeedQueue(storeId, products)
+    logger.info(`[tableToEcom.parseProduct:start] ${body.file_id} => ${data.length} bytes`)
+    // 5.242.880 = 5MB
+    if (data.length < 5242880) {
+      const products = await tableToEcom.parseProduct(data, body.contentType)
+      await handleFeedQueue(storeId, products)
+    } else {
+      logger.warn(`[s:${storeId}] ${body.file_id} very large file`)
+    }
   } catch (error) {
     logger.warn('[tableToEcom.parseProduct:error]')
     logger.error(error)
