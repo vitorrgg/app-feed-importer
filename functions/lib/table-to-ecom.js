@@ -25,7 +25,7 @@ const MAPPED_COLUMNS = [
   },
   {
     tableColumn: 'tipo',
-    feedColumn:  'g:item_group_id',
+    feedColumn: 'g:item_group_id',
     parser: (row, value) => {
       if (['variacao', 'com-variacao'].includes(value)) {
         const sku = row.getCell('g:sku').text

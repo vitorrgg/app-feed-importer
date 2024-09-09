@@ -79,7 +79,7 @@ const handleFeedTableQueue = async (notification) => {
     const { body, store_id: storeId } = notification
     const storageBucket = admin.storage().bucket('gs://ecom-feed-importer.appspot.com')
     const [data] = await storageBucket.file(body.file_id).download()
-    logger.info('[tableToEcom.parseProduct:start]', data.length)
+    logger.info(`[tableToEcom.parseProduct:start]: ${body.file_id} => ${data.length} bytes`)
     const products = await tableToEcom.parseProduct(data, body.contentType)
     await handleFeedQueue(storeId, products)
   } catch (error) {
