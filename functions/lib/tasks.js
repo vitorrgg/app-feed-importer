@@ -205,12 +205,12 @@ const handleWorker = async () => {
     const queueState = queueController.data()
     const queueLastExecution = queueState.last_excution?.toMillis()
     const now = admin.firestore.Timestamp.now().toMillis()
-    if (queueLastExecution && (now - queueLastExecution >= 4 * 60 * 1000) && (queueState.store_ids && queueState.store_ids.length)) {
+    if (queueLastExecution && (now - queueLastExecution >= 2 * 60 * 1000) && (queueState.store_ids && queueState.store_ids.length)) {
       logger.info('Reset execution')
       await queueControllerRef.doc(queueController.id).set({
         running: false,
         store_ids: [],
-        last_excution: now
+        last_excution: admin.firestore.Timestamp.now()
       }, { merge: true })
 
       return
