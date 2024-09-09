@@ -215,12 +215,20 @@ const handleWorker = async () => {
     const storeIds = []
     if (!notificationDocs.empty) {
       const docsToRun = []
+      let limitDocs = 30
+      // imageLinks
+      // resource":"feed_import_image
       notificationDocs.forEach(doc => {
         const data = doc.data()
-        if (docsToRun.length < 30) {
+        if (docsToRun.length < limitDocs) {
           if (queueState && queueState.store_ids && !queueState.store_ids.includes(data.store_id)) {
             if (!storeIds.includes(data.store_id)) {
               storeIds.push(data.store_id)
+            }
+            if (data.resource === 'feed_import_image') {
+              const quantityImgs = data.imageLinks?.length
+              limitDocs -= quantityImgs || 0
+              logger.info(`limit:${limitDocs}`)
             }
             docsToRun.push(
               run(doc, data)
