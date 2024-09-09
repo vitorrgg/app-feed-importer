@@ -17,7 +17,6 @@ const debugAxiosError = error => {
 }
 
 const findEcomProductBySKU = async (appSdk, storeId, sku, meta = {}) => {
-  console.log('findEcomProduct', sku)
   const resource = `/products.json?sku=${sku}`
   meta.findEcomProductBySKU = { resource, sku, method: 'GET ' }
   try {
@@ -130,7 +129,6 @@ const getCategory = async (appSdk, storeId, feedProduct) => {
     if (gmcCategory.textContent) {
       const categoryName = gmcCategory.textContent.split('>').reverse()[0].trim()
       const categorySlug = slugify(categoryName, { strict: true, replacement: '-', lower: true })
-      console.log('------------', 'getCategory', categoryName)
       const category = await findCategoryByName(appSdk, storeId, categoryName)
       if (category && Array.isArray(category.result) && category.result.length) {
         const foundCategory = { _id: category.result[0]._id, name: category.result[0].name, slug: category.result[0].slug }
@@ -341,7 +339,6 @@ const saveEcomProduct = async (appSdk, appData, storeId, feedProduct, variations
     const method = _id ? 'PATCH' : 'POST'
     const parsedProduct = await parseProduct(appSdk, appData, auth, storeId, feedProduct, product, meta)
     let ecomResponse = {}
-    console.log('Enviando produto', parsedProduct.name, parsedProduct.sku)
     if (appData.update_product || method === 'POST') {
       const ecomRequest = { resource, method, parsedProduct: JSON.stringify(parsedProduct || '') }
       meta.ecomRequest = ecomRequest
@@ -350,7 +347,6 @@ const saveEcomProduct = async (appSdk, appData, storeId, feedProduct, variations
       ecomResponse = response.data || { _id }
       if (isVariation) {
         const { result: savedProduct } = await findEcomProductBySKU(appSdk, storeId, sku)
-        console.log('-----------------------savedProduct')
         await saveEcomVariations(appSdk, appData, storeId, variations, savedProduct[0])
       }
     }
@@ -377,9 +373,6 @@ const saveEcomVariations = async (appSdk, appData, storeId, variations, product)
       }
       parsedVariations.push(parsedVariation)
     }
-
-    console.log('quebra aqui ------')
-
     await appSdk.apiRequest(parseInt(storeId), `/products/${product._id}.json`, 'PATCH', { variations: parsedVariations })
   } catch (error) {
     debugAxiosError(error)

@@ -79,7 +79,7 @@ const handleFeedTableQueue = async (notification) => {
     const { body, store_id: storeId } = notification
     const storageBucket = admin.storage().bucket('gs://ecom-feed-importer.appspot.com')
     const [data] = await storageBucket.file(body.file_id).download()
-    logger.info('[tableToEcom.parseProduct:start]')
+    logger.info('[tableToEcom.parseProduct:start]', data.length)
     const products = await tableToEcom.parseProduct(data, body.contentType)
     await handleFeedQueue(storeId, products)
   } catch (error) {
@@ -227,23 +227,23 @@ const handleWorker = async () => {
     const storeIds = []
     if (!notificationDocs.empty) {
       const docsToRun = []
-      let limitDocs = 30
-      // imageLinks
-      // resource":"feed_import_image
+      let queueSize = 30
       notificationDocs.forEach(doc => {
         const data = doc.data()
-        if (docsToRun.length < limitDocs) {
+        if (docsToRun.length < queueSize) {
           let isPushDoc = true
           if (queueState && queueState.store_ids && !queueState.store_ids.includes(data.store_id)) {
             if (!storeIds.includes(data.store_id)) {
               storeIds.push(data.store_id)
             }
             if (data.resource === 'feed_import_image') {
+              // queue size depends on the amount of images
               const quantityImgs = data.body?.imageLinks?.length
-              limitDocs -= quantityImgs || 0
+              queueSize -= quantityImgs || 0
             } else if (data.resource === 'feed_import_table') {
-              isPushDoc = limitDocs > 20
-              limitDocs = isPushDoc ? 0 : limitDocs
+              // import one table at a time
+              isPushDoc = queueSize > 20
+              queueSize = isPushDoc ? 0 : queueSize
             }
             if (isPushDoc) {
               docsToRun.push(
