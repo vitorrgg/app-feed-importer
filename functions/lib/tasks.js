@@ -204,14 +204,15 @@ const handleWorker = async () => {
     const notificationRef = admin.firestore().collection('ecom_notifications')
     const queueState = queueController.data()
     const queueLastExecution = queueState.last_excution?.toMillis()
+    const now = admin.firestore.Timestamp.now().toMillis()
     if (queueLastExecution) {
-      console.log(`last ${queueLastExecution} ${queueLastExecution >= 2 * 60 * 1000}`)
+      console.log(`last ${queueLastExecution} ${now} ${now - queueLastExecution >= 2 * 60 * 1000}`)
     }
     if (queueState.running && (!queueState.store_ids || !queueState.store_ids.length)) {
       return
     }
     const query = notificationRef
-      .where('ready_at', '<=', admin.firestore.Timestamp.now().toMillis())
+      .where('ready_at', '<=', now)
       .orderBy('ready_at').limit(100)
 
     const notificationDocs = await query.get()
