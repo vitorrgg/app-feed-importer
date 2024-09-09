@@ -239,7 +239,7 @@ const handleWorker = async () => {
             }
             if (data.resource === 'feed_import_image') {
               logger.info(`data: ${JSON.stringify(data)}`)
-              const quantityImgs = data.imageLinks?.length
+              const quantityImgs = data.body?.imageLinks?.length
               limitDocs -= quantityImgs || 0
               logger.info(`limit:${limitDocs}`)
             }
