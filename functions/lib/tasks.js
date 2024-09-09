@@ -208,7 +208,7 @@ const handleWorker = async () => {
     const queueLastExecution = queueState.last_excution?.toMillis()
     const now = admin.firestore.Timestamp.now().toMillis()
     if (queueLastExecution && (now - queueLastExecution >= 2 * 60 * 1000) && (queueState.store_ids && queueState.store_ids.length)) {
-      logger.info('Reset execution')
+      logger.warn('>Reset execution')
       await queueControllerRef.doc(queueController.id).set({
         running: false,
         store_ids: [],
@@ -222,16 +222,17 @@ const handleWorker = async () => {
     }
     const query = notificationRef
       .where('ready_at', '<=', now)
-      .orderBy('ready_at').limit(100)
+      .orderBy('ready_at').limit(600)
 
+    const limitDocs = 50
     const notificationDocs = await query.get()
     const storeIds = []
     if (!notificationDocs.empty) {
       const docsToRun = []
-      let queueSize = 30
+      let limitQueueSize = limitDocs
       notificationDocs.forEach(doc => {
         const data = doc.data()
-        if (docsToRun.length < queueSize) {
+        if (docsToRun.length < limitQueueSize) {
           let isPushDoc = true
           if (queueState && queueState.store_ids && !queueState.store_ids.includes(data.store_id)) {
             if (!storeIds.includes(data.store_id)) {
@@ -240,21 +241,14 @@ const handleWorker = async () => {
             if (data.resource === 'feed_import_image') {
               // queue size depends on the amount of images
               const quantityImgs = data.body?.imageLinks?.length
-              queueSize -= quantityImgs || 0
+              limitQueueSize -= quantityImgs || 0
             } else if (data.resource === 'feed_import_table') {
               // import one table at a time
-              isPushDoc = queueSize > 20
-              queueSize = isPushDoc ? 0 : queueSize
+              isPushDoc = limitQueueSize > (limitDocs - 10)
+              limitQueueSize = isPushDoc ? 0 : limitQueueSize
             }
             if (isPushDoc) {
-              docsToRun.push(
-                run(doc, data)
-                  .catch((err) => {
-                    //  Todo: remove debug
-                    logger.error(err)
-                    throw err
-                  })
-              )
+              docsToRun.push(run(doc, data))
             }
           }
         }
