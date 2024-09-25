@@ -255,8 +255,10 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
     if (mpn) {
       newProductData.mpn = [mpn.toString()]
     }
-    if (condition) {
+    if (condition == "new" || "refurbished" || "used" || "not_specified") {
       newProductData.condition = condition
+    } else {
+    newProductData.condition = "new"
     }
     const dimensions = ['shipping_length', 'shipping_width', 'shipping_height']
     newProductData.dimensions = {}
