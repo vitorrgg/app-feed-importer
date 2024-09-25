@@ -257,6 +257,8 @@ const parseProduct = async (appSdk, appData, auth, storeId, feedProduct, product
     }
     if (condition) {
       newProductData.condition = condition
+    } else {
+      newProductData.condition = "new"
     }
     const dimensions = ['shipping_length', 'shipping_width', 'shipping_height']
     newProductData.dimensions = {}
